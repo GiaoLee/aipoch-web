@@ -104,7 +104,7 @@ describe('sitemap', () => {
     const blogRoute = routes.find((route) => route.url === `${siteDomain}/blog`)
     const guidesIndexRoute = routes.find((route) => route.url === `${siteDomain}/guides`)
     const guideDetailRoute = routes.find(
-      (route) => route.url === `${siteDomain}/guides/openclaw-local-deployment`
+      (route) => route.url === `${siteDomain}/guides/what-is-a-skill`
     )
 
     expect((homepageRoute?.lastModified as Date).toISOString()).toBe('2026-09-17T00:00:00.000Z')
@@ -147,14 +147,30 @@ describe('sitemap', () => {
     expect((blogRoute?.lastModified as Date).toISOString()).toBe('2026-09-18T00:00:00.000Z')
     expect(guidesIndexRoute).toBeUndefined()
     expect(guideDetailRoute).toMatchObject({
-      url: `${siteDomain}/guides/openclaw-local-deployment`,
+      url: `${siteDomain}/guides/what-is-a-skill`,
       changeFrequency: 'weekly',
       priority: 0.7
     })
-    expect((guideDetailRoute?.lastModified as Date).toISOString()).toBe('2026-09-17T00:00:00.000Z')
+    expect((guideDetailRoute?.lastModified as Date).toISOString()).toBe('2026-09-20T00:00:00.000Z')
     expect(routes.some((route) => route.url === `${siteDomain}/community`)).toBe(false)
     expect(routes.some((route) => route.url === `${siteDomain}/medflow-redesign`)).toBe(false)
   })
+
+  test('lists only the three active guides with their content and navigation update date', async () => {
+    const { default: sitemap } = await import('../../app/sitemap')
+    const routes = await sitemap()
+    const guideRoutes = routes.filter((route) => route.url.startsWith(`${siteDomain}/guides/`))
+
+    expect(guideRoutes.map((route) => route.url)).toEqual([
+      `${siteDomain}/guides/what-is-a-skill`,
+      `${siteDomain}/guides/get-started-with-skills`,
+      `${siteDomain}/guides/build-your-own-skill`
+    ])
+    for (const route of guideRoutes) {
+      expect((route.lastModified as Date).toISOString()).toBe('2026-09-20T00:00:00.000Z')
+    }
+  })
+
   test('updates shared-layout pages while preserving newer content and Wiki dates', async () => {
     const { default: sitemap } = await import('../../app/sitemap')
     const routes = await sitemap()

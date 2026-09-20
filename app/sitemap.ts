@@ -158,7 +158,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const guideRoutes: MetadataRoute.Sitemap = guides.map((guide) =>
     withReliableLastModified({
       url: `${SITE_DOMAIN}/guides/${guide.slug}`,
-      lastModified: SEO_PAGE_LAST_MODIFIED,
+      lastModified: guide.frontmatter.lastModified ?? SEO_PAGE_LAST_MODIFIED,
       changeFrequency: 'weekly',
       priority: 0.7
     })
