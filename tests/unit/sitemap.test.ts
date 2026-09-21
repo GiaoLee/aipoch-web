@@ -25,7 +25,7 @@ mock.module('@/lib/config', () => ({
 mock.module('@/service/blog', () => ({
   fetchBlogSitemap: async () => [
     { url: `${siteDomain}/blog/existing-post`, last_modified: '2026-08-12' },
-    { url: `${siteDomain}/blog/newer-post`, last_modified: '2026-09-18T08:00:00Z' }
+    { url: `${siteDomain}/blog/newer-post`, last_modified: '2026-09-21T08:00:00Z' }
   ]
 }))
 
@@ -107,44 +107,44 @@ describe('sitemap', () => {
       (route) => route.url === `${siteDomain}/guides/what-is-a-skill`
     )
 
-    expect((homepageRoute?.lastModified as Date).toISOString()).toBe('2026-09-17T00:00:00.000Z')
+    expect((homepageRoute?.lastModified as Date).toISOString()).toBe('2026-09-21T00:00:00.000Z')
 
     expect(openScienceRoute).toMatchObject({
       changeFrequency: 'weekly',
       priority: 0.8
     })
-    expect((openScienceRoute?.lastModified as Date).toISOString()).toBe('2026-09-17T00:00:00.000Z')
+    expect((openScienceRoute?.lastModified as Date).toISOString()).toBe('2026-09-20T00:00:00.000Z')
 
     expect(openScienceDownloadRoute).toMatchObject({
       changeFrequency: 'weekly',
       priority: 0.8
     })
     expect((openScienceDownloadRoute?.lastModified as Date).toISOString()).toBe(
-      '2026-09-17T00:00:00.000Z'
+      '2026-09-20T00:00:00.000Z'
     )
 
     expect(medFlowRoute).toMatchObject({
       changeFrequency: 'monthly',
       priority: 0.8
     })
-    expect((medFlowRoute?.lastModified as Date).toISOString()).toBe('2026-09-20T00:00:00.000Z')
+    expect((medFlowRoute?.lastModified as Date).toISOString()).toBe('2026-09-21T00:00:00.000Z')
 
     expect(agentSkillsRoute).toMatchObject({
       changeFrequency: 'weekly',
       priority: 0.8
     })
-    expect((agentSkillsRoute?.lastModified as Date).toISOString()).toBe('2026-09-17T00:00:00.000Z')
+    expect((agentSkillsRoute?.lastModified as Date).toISOString()).toBe('2026-09-20T00:00:00.000Z')
 
     expect(medSkillAuditRoute).toMatchObject({
       changeFrequency: 'monthly',
       priority: 0.8
     })
     expect((medSkillAuditRoute?.lastModified as Date).toISOString()).toBe(
-      '2026-09-17T00:00:00.000Z'
+      '2026-09-20T00:00:00.000Z'
     )
-    expect((skillsListRoute?.lastModified as Date).toISOString()).toBe('2026-09-17T00:00:00.000Z')
-    expect((skillDetailRoute?.lastModified as Date).toISOString()).toBe('2026-09-17T00:00:00.000Z')
-    expect((blogRoute?.lastModified as Date).toISOString()).toBe('2026-09-18T00:00:00.000Z')
+    expect((skillsListRoute?.lastModified as Date).toISOString()).toBe('2026-09-20T00:00:00.000Z')
+    expect((skillDetailRoute?.lastModified as Date).toISOString()).toBe('2026-09-20T00:00:00.000Z')
+    expect((blogRoute?.lastModified as Date).toISOString()).toBe('2026-09-21T00:00:00.000Z')
     expect(guidesIndexRoute).toBeUndefined()
     expect(guideDetailRoute).toMatchObject({
       url: `${siteDomain}/guides/what-is-a-skill`,
@@ -177,12 +177,14 @@ describe('sitemap', () => {
     const routeDate = (url: string) =>
       (routes.find((route) => route.url === url)?.lastModified as Date)?.toISOString()
 
-    expect(routeDate(`${siteDomain}/blog/existing-post`)).toBe('2026-09-18T00:00:00.000Z')
-    expect(routeDate(`${siteDomain}/blog/newer-post`)).toBe('2026-09-18T08:00:00.000Z')
+    expect(routeDate(`${siteDomain}/blog`)).toBe('2026-09-21T00:00:00.000Z')
+    expect(routeDate(`${siteDomain}/agent-skills/list`)).toBe('2026-09-20T00:00:00.000Z')
+    expect(routeDate(`${siteDomain}/blog/existing-post`)).toBe('2026-09-21T00:00:00.000Z')
+    expect(routeDate(`${siteDomain}/blog/newer-post`)).toBe('2026-09-21T08:00:00.000Z')
     expect(routeDate(`${siteDomain}/docs/getting-started`)).toBe('2026-08-17T08:30:00.000Z')
     for (const route of routes.filter((route) => !route.url.startsWith(`${siteDomain}/docs/`))) {
       expect(new Date(route.lastModified as Date).getTime()).toBeGreaterThanOrEqual(
-        Date.parse('2026-09-17')
+        Date.parse('2026-09-20')
       )
     }
     for (const excluded of ['/guides', '/community', '/claim/private-token']) {
