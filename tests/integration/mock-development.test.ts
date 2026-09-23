@@ -83,18 +83,20 @@ describe('mock development end to end', () => {
     const sitemap = await (await fetch(`${web}/sitemap.xml`)).text()
     expect(sitemap).toContain('/agent-skills/literature-review</loc>')
     for (const [path, date] of [
-      ['', '2026-09-21'],
-      ['/agent-skills/list', '2026-09-20'],
-      ['/blog', '2026-09-21'],
-      ['/blog/release-notes', '2026-09-21']
+      ['', '2026-09-23'],
+      ['/agent-skills/list', '2026-09-23'],
+      ['/agent-skills/literature-review', '2026-09-23'],
+      ['/blog', '2026-09-23'],
+      ['/blog/release-notes', '2026-09-23']
     ]) {
       expect(sitemap).toContain(
         `<loc>https://aipoch.com${path}</loc>\n<lastmod>${date}T00:00:00.000Z</lastmod>`
       )
     }
     expect(sitemap).toContain(
-      '<loc>https://aipoch.com/open-science/download</loc>\n<lastmod>2026-09-20T00:00:00.000Z</lastmod>'
+      '<loc>https://aipoch.com/open-science/download</loc>\n<lastmod>2026-09-23T00:00:00.000Z</lastmod>'
     )
+    expect(sitemap).not.toContain('/leaderboard')
     expect(sitemap).not.toContain('/claim/')
     expect(sitemap).not.toContain('/open-science/overview</loc>')
   }, 120000)
@@ -404,6 +406,176 @@ describe('mock development end to end', () => {
         await browser.close()
       }
     }, 120000)
+  }
+
+  for (const device of ['desktop', 'mobile']) {
+    test(`${device}: redesigned leaderboard preserves search, ranges, categories and infinite loading`, async () => {
+      const browser = await chromium.launch()
+      try {
+        const page = await browser.newPage(
+          device === 'mobile' ? devices['Pixel 5'] : { viewport: { width: 1440, height: 1000 } }
+        )
+        page.setDefaultTimeout(15000)
+        const errors: string[] = []
+        page.on('pageerror', (error) => errors.push(error.message))
+        await page.goto(`${web}/leaderboard`)
+        const reject = page.getByRole('button', { name: 'Reject Non-Essential' })
+        if (await reject.isVisible()) await reject.click()
+        const results = page.getByRole('region', { name: 'Leaderboard results' })
+        const rows = results.getByRole('link', {
+          name: /Literature Review|Clinical Trials|Data Analysis|Evidence Synthesis|Patient Summary|Statistical Review/
+        })
+        await browserExpect(rows).toHaveCount(20)
+        await browserExpect(page.getByRole('definition')).toHaveCount(3)
+        if (device === 'desktop') {
+          await rows.first().hover()
+          await browserExpect(rows.first()).toHaveCSS('box-shadow', 'none')
+          const statistics = await page.getByRole('definition').first().boundingBox()
+          const title = await page
+            .getByRole('heading', { name: 'Leaderboard', exact: true })
+            .boundingBox()
+          expect(statistics && title && statistics.x > title.x + title.width).toBe(true)
+        }
+        await browserExpect(
+          page.getByRole('link', { name: 'Weekly', exact: true })
+        ).toHaveAttribute('href', '/leaderboard/weekly')
+        await page.mouse.move(0, 0)
+        await page.screenshot({
+          path: join(reviewArtifacts, `leaderboard-redesign-${device}.png`),
+          fullPage: true
+        })
+        await rows.last().scrollIntoViewIfNeeded()
+        await page.getByText('Loaded 20 / 30', { exact: true }).scrollIntoViewIfNeeded()
+        await browserExpect(rows).toHaveCount(30)
+        const searchResponse = page.waitForResponse(
+          (r) =>
+            r.url().includes('/leaderboards/overall?') &&
+            r.url().includes('keyword=Clinical') &&
+            r.status() === 200
+        )
+        await page.getByRole('searchbox', { name: 'Search skills' }).fill('Clinical')
+        expect((await searchResponse).fromServiceWorker()).toBe(true)
+        await browserExpect(rows).toHaveCount(5)
+        await page.getByRole('searchbox', { name: 'Search skills' }).fill('no-such-skill')
+        await browserExpect(page.getByText('No results found')).toBeVisible()
+        await page.getByRole('button', { name: 'Clear', exact: true }).click()
+        await page.getByRole('button', { name: 'Filters', exact: true }).click()
+        const filters = page.locator('#leaderboard-filters')
+        await browserExpect(filters).toBeVisible()
+        await filters.getByRole('button', { name: 'Clinical Practice', exact: true }).click()
+        await browserExpect(rows).toHaveCount(10)
+        await filters.getByLabel('Maximum rank', { exact: true }).fill('10')
+        await browserExpect(rows).toHaveCount(3)
+        await filters.getByRole('button', { name: 'Reset all' }).click()
+        // Reset restores the unfiltered query, including its already loaded second page.
+        await browserExpect(rows).toHaveCount(30)
+        await page.getByRole('button', { name: 'Filters', exact: true }).click()
+        await browserExpect(filters).toBeHidden()
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+          true
+        )
+        await rows.first().getByText('Literature Review', { exact: true }).click()
+        await browserExpect(page).toHaveURL(`${web}/leaderboard/items/literature-review`)
+        expect(errors).toEqual([])
+      } finally {
+        await browser.close()
+      }
+    }, 90000)
+
+    test(`${device}: redesigned skill detail preserves files, documentation, downloads and report navigation`, async () => {
+      const browser = await chromium.launch()
+      try {
+        const page = await browser.newPage(
+          device === 'mobile' ? devices['Pixel 5'] : { viewport: { width: 1440, height: 1000 } }
+        )
+        page.setDefaultTimeout(15000)
+        const errors: string[] = []
+        page.on('pageerror', (error) => errors.push(error.message))
+        // Observe the existing external destination without navigating to GitHub during local checks.
+        await page.addInitScript(() => {
+          window.open = (url) => {
+            document.documentElement.dataset.openedUrl = String(url)
+            return null
+          }
+        })
+        await page.goto(`${web}/agent-skills/literature-review`)
+        const reject = page.getByRole('button', { name: 'Reject Non-Essential' })
+        if (await reject.isVisible()) await reject.click()
+        await browserExpect(
+          page.getByRole('heading', { name: 'Literature Review', level: 1 }).first()
+        ).toBeVisible()
+        const summary = page.getByRole('region', { name: 'Skill evaluation summary' })
+        await browserExpect(summary).toContainText('18 / 20 Passed')
+        await browserExpect(summary).toContainText('Functional Suitability')
+        if (device === 'desktop') {
+          const bounds = await summary.boundingBox()
+          expect(bounds?.height).toBeLessThan(480)
+          const panels = await summary.evaluate((element) => {
+            const core = element.children[1]?.lastElementChild
+            const medical = element.children[2]?.lastElementChild
+            if (!core || !medical) throw new Error('Missing evaluation panels')
+            return {
+              core: core.getBoundingClientRect().toJSON(),
+              medical: medical.getBoundingClientRect().toJSON(),
+              rows: [...medical.children].map((row) => row.getBoundingClientRect().height)
+            }
+          })
+          expect(Math.abs(panels.core.top - panels.medical.top)).toBeLessThan(1)
+          expect(Math.abs(panels.core.bottom - panels.medical.bottom)).toBeLessThan(1)
+          expect(Math.max(...panels.rows) - Math.min(...panels.rows)).toBeLessThanOrEqual(1.1)
+        }
+        const root = page.getByRole('button', { name: 'literature-review/', exact: true })
+        await root.focus()
+        await page.keyboard.press('Enter')
+        await browserExpect(page.getByText('research-checklist.md', { exact: true })).toBeHidden()
+        await page.keyboard.press('Enter')
+        await browserExpect(page.getByText('research-checklist.md', { exact: true })).toBeVisible()
+        const downloadResponse = page.waitForResponse(
+          (r) => r.url().includes('/skills/literature-review/github_download') && r.status() === 200
+        )
+        await page.getByRole('button', { name: 'Download Skills', exact: true }).click()
+        expect((await downloadResponse).fromServiceWorker()).toBe(true)
+        await browserExpect(page.locator('html')).toHaveAttribute(
+          'data-opened-url',
+          'https://github.com/aipoch/medical-research-skills'
+        )
+        await browserExpect(
+          page.getByRole('link', { name: 'View Evaluation Report', exact: true })
+        ).toHaveAttribute('href', '/leaderboard/items/literature-review-result')
+        await page.mouse.move(0, 0)
+        await page.screenshot({
+          path: join(reviewArtifacts, `skill-detail-redesign-${device}.png`),
+          fullPage: true
+        })
+        const toc = page.getByRole('navigation', { name: 'On this page', exact: true })
+        if (device === 'desktop') {
+          await toc.getByRole('link', { name: 'Requirements', exact: true }).click()
+          await browserExpect(page).toHaveURL(/#heading-requirements$/)
+          await browserExpect(page.locator('#heading-requirements')).toBeInViewport()
+        }
+        await browserExpect(page.locator('article table')).toContainText('Research question')
+        await browserExpect(page.locator('article pre')).toContainText('scripts/main.py')
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+          true
+        )
+        const schemas = await page.locator('script[type="application/ld+json"]').allTextContents()
+        const parsed = schemas.map((schema) => JSON.parse(schema))
+        expect(parsed.find((schema) => schema['@type'] === 'WebPage').dateModified).toBe(
+          '2026-09-23'
+        )
+        expect(
+          parsed.find((schema) => schema['@type'] === 'SoftwareApplication').dateModified
+        ).toBe('2026-09-01T00:00:00.000Z')
+        await page.getByRole('link', { name: 'View Evaluation Report', exact: true }).click()
+        await browserExpect(page).toHaveURL(`${web}/leaderboard/items/literature-review-result`)
+        // The report retains its original score ring and bright-green evaluation widgets.
+        await browserExpect(page.locator('main')).toBeVisible()
+        expect(await page.locator('main').innerText()).toContain('literature-review')
+        expect(errors).toEqual([])
+      } finally {
+        await browser.close()
+      }
+    }, 90000)
   }
 
   test('stops both ports when the foreground launcher receives SIGTERM', async () => {

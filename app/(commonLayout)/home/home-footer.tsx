@@ -36,7 +36,7 @@ const columns = [
   ]
 ] as const
 
-export function HomeFooter() {
+export function HomeFooter({ variant = 'home' }: { variant?: 'home' | 'content' }) {
   return (
     <footer className="bg-[#0b0b0c] px-6 pb-5 pt-12 text-white sm:px-7">
       <div className="mx-auto max-w-[1164px]">
@@ -53,7 +53,9 @@ export function HomeFooter() {
               />
             </Link>
             <p className="mt-4 text-[12.5px] leading-[21px] text-white/70">
-              We build insight moment for scientific research.
+              {variant === 'home'
+                ? 'We build insight moment for scientific research.'
+                : 'The open-source harness for scientific research - model-agnostic, auditable, and yours to run.'}
             </p>
           </div>
           <div className="grid grid-cols-2 gap-x-7 gap-y-8 sm:grid-cols-[1fr_1.35fr_.75fr_1fr]">
@@ -63,18 +65,23 @@ export function HomeFooter() {
                   {label}
                 </h2>
                 <ul className="space-y-2">
-                  {links.map(([title, href]) => (
-                    <li key={title}>
-                      <Link
-                        href={href}
-                        target={href.startsWith('https:') ? '_blank' : undefined}
-                        rel={href.startsWith('https:') ? 'noopener noreferrer' : undefined}
-                        className="text-[13px] text-white/80 transition-colors hover:text-[#fbdd67]"
-                      >
-                        {title}
-                      </Link>
-                    </li>
-                  ))}
+                  {links.map(([label, destination]) => {
+                    const preserveGuides = variant === 'content' && destination === '/open-science'
+                    const title = preserveGuides ? 'Guides' : label
+                    const href = preserveGuides ? '/guides/what-is-a-skill' : destination
+                    return (
+                      <li key={title}>
+                        <Link
+                          href={href}
+                          target={href.startsWith('https:') ? '_blank' : undefined}
+                          rel={href.startsWith('https:') ? 'noopener noreferrer' : undefined}
+                          className="text-[13px] text-white/80 transition-colors hover:text-[#fbdd67]"
+                        >
+                          {title}
+                        </Link>
+                      </li>
+                    )
+                  })}
                 </ul>
               </div>
             ))}

@@ -3,6 +3,7 @@ import { HOMEPAGE_LAYOUT_LAST_MODIFIED } from '@/app/(commonLayout)/home/home-st
 import { MEDFLOW_PAGE_LAST_MODIFIED } from '@/app/(commonLayout)/medflow/medflow-metadata'
 import { OPEN_SCIENCE_PAGE_LAST_MODIFIED } from '@/app/(commonLayout)/open-science/open-science-metadata'
 import { toSchemaDate } from '@/app/(commonLayout)/open-science/open-science-structured-data'
+import { agentSkillPageLastModified } from '@/lib/agent-skill-page-metadata'
 import { BLOG_PAGE_LAST_MODIFIED, blogArticleLastModified } from '@/lib/blog-page-metadata'
 import { commonLayoutLastModified } from '@/lib/common-layout-metadata'
 import { INTERNAL_API_URL, SITE_DOMAIN } from '@/lib/config'
@@ -13,7 +14,7 @@ import { fetchOpenScienceWikiSitemap } from '@/service/wiki-sitemap'
 
 const AGENT_SKILLS_LAST_MODIFIED = '2026-09-11'
 const OPEN_SCIENCE_DOWNLOAD_LAST_MODIFIED = '2026-09-11'
-const AGENT_SKILLS_LIST_LAST_MODIFIED = '2026-09-20'
+const AGENT_SKILLS_LIST_LAST_MODIFIED = '2026-09-23'
 
 // Disable cache, regenerate on every request
 export const dynamic = 'force-dynamic'
@@ -140,7 +141,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const dynamicRoutes: MetadataRoute.Sitemap = skillsSitemap.map((item) =>
     withReliableLastModified({
       url: item.url,
-      lastModified: latestPageDate(item.last_modified, SEO_PAGE_LAST_MODIFIED),
+      lastModified: agentSkillPageLastModified(item.last_modified),
       changeFrequency: item.change_frequency || 'weekly',
       priority: item.priority ?? 0.8
     })
