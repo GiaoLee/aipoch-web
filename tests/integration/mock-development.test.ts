@@ -83,17 +83,17 @@ describe('mock development end to end', () => {
     const sitemap = await (await fetch(`${web}/sitemap.xml`)).text()
     expect(sitemap).toContain('/agent-skills/literature-review</loc>')
     for (const [path, date] of [
-      ['', '2026-09-21'],
-      ['/agent-skills/list', '2026-09-20'],
-      ['/blog', '2026-09-21'],
-      ['/blog/release-notes', '2026-09-21']
+      ['', '2026-10-08'],
+      ['/agent-skills/list', '2026-10-08'],
+      ['/blog', '2026-10-08'],
+      ['/blog/release-notes', '2026-10-08']
     ]) {
       expect(sitemap).toContain(
         `<loc>https://aipoch.com${path}</loc>\n<lastmod>${date}T00:00:00.000Z</lastmod>`
       )
     }
     expect(sitemap).toContain(
-      '<loc>https://aipoch.com/open-science/download</loc>\n<lastmod>2026-09-20T00:00:00.000Z</lastmod>'
+      '<loc>https://aipoch.com/open-science/download</loc>\n<lastmod>2026-10-08T00:00:00.000Z</lastmod>'
     )
     expect(sitemap).not.toContain('/claim/')
     expect(sitemap).not.toContain('/open-science/overview</loc>')
@@ -109,7 +109,7 @@ describe('mock development end to end', () => {
       const header = page.locator('article header')
       expect(await header.innerText()).toContain('MIN READ')
       await browserExpect(header.locator('time')).toHaveText('Sep 1, 2026')
-      const metadata = header.locator('time').locator('..')
+      const metadata = header.locator('time').locator('../..')
       expect(await metadata.innerText()).toMatch(/Sep 1, 2026[\s\S]+3 MIN READ/)
       const contentGap = await page
         .locator('.blog-article-body .markdown-body > :first-child')
