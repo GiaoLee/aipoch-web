@@ -23,7 +23,7 @@ export function SkillCard({ skill }: SkillCardProps) {
     <Link
       href={`/agent-skills/${skillPath}`}
       scroll={false}
-      className="group flex min-h-[368px] flex-col border border-[#e7e4db] bg-white p-6 transition-shadow duration-200 hover:shadow-[0_10px_24px_rgba(0,0,0,0.14)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#915600]"
+      className="group flex flex-col border border-[#e7e4db] bg-white p-6 transition-shadow duration-200 hover:shadow-[0_10px_24px_rgba(0,0,0,0.14)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#915600]"
     >
       {/* Header */}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
@@ -60,7 +60,9 @@ export function SkillCard({ skill }: SkillCardProps) {
       </h3>
 
       {/* Description */}
-      <p className="mb-4 text-sm leading-5 text-[#6b6b66]">{skill.description}</p>
+      <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-[#6b6b66]">
+        {skill.description}
+      </p>
 
       {/* Tags */}
       <div className="mb-6 flex flex-wrap gap-2">

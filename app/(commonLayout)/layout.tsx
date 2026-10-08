@@ -12,7 +12,7 @@ const commonLayout: React.FC<layoutProps> = ({ children }) => {
     <div className="flex min-h-screen flex-col pt-[var(--nav-h)]">
       <Navbar />
       {children}
-      <FooterByRoute home={<HomeFooter />}>
+      <FooterByRoute home={<HomeFooter />} content={<HomeFooter variant="content" />}>
         <Footer />
       </FooterByRoute>
     </div>

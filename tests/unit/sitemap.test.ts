@@ -62,7 +62,9 @@ globalThis.fetch = mock(async (input) => {
             last_modified: '2026-08-01',
             change_frequency: 'weekly',
             priority: 0.8
-          }
+          },
+          { url: `${siteDomain}/agent-skills/newer-skill`, last_modified: '2026-10-09T08:00:00Z' },
+          { url: `${siteDomain}/agent-skills/undated-skill`, last_modified: 'invalid' }
         ]
       })
     )
@@ -190,6 +192,21 @@ describe('sitemap', () => {
     for (const excluded of ['/guides', '/community', '/claim/private-token']) {
       expect(routes.some((route) => route.url === `${siteDomain}${excluded}`)).toBe(false)
     }
+  })
+
+  test('records the skill template date, preserves newer API dates and keeps leaderboards excluded', async () => {
+    const { default: sitemap } = await import('../../app/sitemap')
+    const routes = await sitemap()
+    const date = (slug: string) =>
+      (
+        routes.find((route) => route.url === `${siteDomain}/agent-skills/${slug}`)
+          ?.lastModified as Date
+      )?.toISOString()
+    expect(date('demo-skill')).toBe('2026-10-08T00:00:00.000Z')
+    expect(date('newer-skill')).toBe('2026-10-09T08:00:00.000Z')
+    expect(date('undated-skill')).toBe('2026-10-08T00:00:00.000Z')
+    expect(date('list')).toBe('2026-10-08T00:00:00.000Z')
+    expect(routes.some((route) => route.url.includes('/leaderboard'))).toBe(false)
   })
 
   test('keeps standalone presentations outside the sitemap', async () => {
