@@ -43,7 +43,7 @@ describe('evaluation overview', () => {
     expect(html).not.toContain('bg-[#FB923C]')
     expect(html).not.toContain('bg-[#FBBF24]')
   })
-  test('retains the existing palette for the shared leaderboard report widget', () => {
+  test('retains the existing palette for shared widget consumers by default', () => {
     const html = renderToStaticMarkup(
       <EvaluationScoreWidget
         evaluation={{
