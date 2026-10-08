@@ -1,4 +1,10 @@
-/** Pages covered by the leaderboard and skill-detail Figma rollout. */
+/** Pages using the shared editorial Figma navigation and footer styles. */
 export function usesContentPageDesign(pathname: string): boolean {
-  return pathname === '/leaderboard' || /^\/agent-skills\/(?!list$)[^/]+$/.test(pathname)
+  return (
+    pathname === '/leaderboard' ||
+    pathname === '/medskillaudit' ||
+    /^\/leaderboard\/items\/[^/]+$/.test(pathname) ||
+    /^\/guides\/[^/]+$/.test(pathname) ||
+    /^\/agent-skills\/(?!list$)[^/]+$/.test(pathname)
+  )
 }

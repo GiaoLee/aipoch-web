@@ -1,12 +1,14 @@
 import type { MetadataRoute } from 'next'
 import { HOMEPAGE_LAYOUT_LAST_MODIFIED } from '@/app/(commonLayout)/home/home-structured-data'
 import { MEDFLOW_PAGE_LAST_MODIFIED } from '@/app/(commonLayout)/medflow/medflow-metadata'
+import { MEDSKILLAUDIT_PAGE_LAST_MODIFIED } from '@/app/(commonLayout)/medskillaudit/medskillaudit-structured-data'
 import { OPEN_SCIENCE_PAGE_LAST_MODIFIED } from '@/app/(commonLayout)/open-science/open-science-metadata'
 import { toSchemaDate } from '@/app/(commonLayout)/open-science/open-science-structured-data'
 import { agentSkillPageLastModified } from '@/lib/agent-skill-page-metadata'
 import { BLOG_PAGE_LAST_MODIFIED, blogArticleLastModified } from '@/lib/blog-page-metadata'
 import { commonLayoutLastModified } from '@/lib/common-layout-metadata'
 import { INTERNAL_API_URL, SITE_DOMAIN } from '@/lib/config'
+import { guidePageLastModified } from '@/lib/guide-page-metadata'
 import { getAllGuides } from '@/lib/guides'
 import { fetchBlogSitemap } from '@/service/blog'
 import { fetchOpenScienceDownloadManifest } from '@/service/open-science-download'
@@ -18,8 +20,6 @@ const AGENT_SKILLS_LIST_LAST_MODIFIED = '2026-09-23'
 
 // Disable cache, regenerate on every request
 export const dynamic = 'force-dynamic'
-
-const SEO_PAGE_LAST_MODIFIED = '2026-09-10'
 
 interface SitemapItem {
   url: string
@@ -126,7 +126,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
     withReliableLastModified({
       url: `${SITE_DOMAIN}/medskillaudit`,
-      lastModified: SEO_PAGE_LAST_MODIFIED,
+      lastModified: MEDSKILLAUDIT_PAGE_LAST_MODIFIED,
       changeFrequency: 'monthly',
       priority: 0.8
     }),
@@ -161,7 +161,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const guideRoutes: MetadataRoute.Sitemap = guides.map((guide) =>
     withReliableLastModified({
       url: `${SITE_DOMAIN}/guides/${guide.slug}`,
-      lastModified: guide.frontmatter.lastModified ?? SEO_PAGE_LAST_MODIFIED,
+      lastModified: guidePageLastModified(guide.frontmatter.lastModified),
       changeFrequency: 'weekly',
       priority: 0.7
     })

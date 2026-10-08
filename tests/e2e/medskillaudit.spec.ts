@@ -80,7 +80,7 @@ test('MedSkillAudit page presents framework content and assets', async ({ page }
 
   await expect(page.getByRole('link', { name: 'How it works' })).toHaveAttribute('href', '#how')
   await expect(page.getByText('Design · 40%')).toHaveCSS('background-color', 'rgb(17, 17, 17)')
-  await expect(page.getByText('Runtime · 60%')).toHaveCSS('background-color', 'rgb(43, 111, 176)')
+  await expect(page.getByText('Runtime · 60%')).toHaveCSS('background-color', 'rgb(230, 230, 230)')
   const scoreSection = page.locator('#score')
   await expect(scoreSection.getByText('Score', { exact: true })).toBeVisible()
   await expect(scoreSection.getByText('Grade', { exact: true })).toBeVisible()

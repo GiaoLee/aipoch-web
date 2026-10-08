@@ -18,7 +18,7 @@ const staticHeaderFillClass = {
   red: 'bg-[#EF4444]'
 } as const
 
-// The skill page opts into Figma colors; shared leaderboard report widgets keep their defaults.
+// Reviewed skill and report pages opt into Figma colors; other consumers retain their defaults.
 const editorialColors = {
   green: { fill: '#afd670', text: '#607a32' },
   orange: { fill: '#edb732', text: '#915600' },
@@ -110,10 +110,12 @@ function buildEvaluationPanels(evaluation: SkillEvaluation): EvaluationPanels {
 function CoreCapabilityPanel({
   p,
   editorial = false,
+  compact = false,
   className
 }: {
   p: EvaluationPanels
   editorial?: boolean
+  compact?: boolean
   className?: string
 }) {
   return (
@@ -144,7 +146,8 @@ function CoreCapabilityPanel({
             key={row.rowKey}
             className={cn(
               'rounded-[3px] border border-[#E2E2E2] bg-white px-[11px] py-[9px]',
-              editorial && 'border-[#e7e5de] px-3 py-3'
+              editorial && 'border-[#e7e5de]',
+              editorial && !compact && 'px-3 py-3'
             )}
           >
             <div className="mb-1.5 text-[10px] font-semibold text-[#555555]">{row.label}</div>
@@ -179,10 +182,12 @@ function CoreCapabilityPanel({
 function MedicalTaskPanel({
   p,
   editorial = false,
+  compact = false,
   className
 }: {
   p: EvaluationPanels
   editorial?: boolean
+  compact?: boolean
   className?: string
 }) {
   return (
@@ -212,7 +217,8 @@ function MedicalTaskPanel({
       <div
         className={cn(
           'flex flex-1 flex-col rounded-[3px] border border-black/[0.07] bg-black/3 p-1.5',
-          editorial && 'rounded-none bg-[#f7f7f7] p-2.5'
+          editorial && 'rounded-none bg-[#f7f7f7]',
+          editorial && !compact && 'p-2.5'
         )}
       >
         {p.medicalRows.map((row, idx) => (
@@ -221,7 +227,7 @@ function MedicalTaskPanel({
             className={cn(
               'flex min-h-0 flex-1 items-center justify-between gap-3 px-1 py-0',
               idx < p.medicalRows.length - 1 && 'border-b border-black/6',
-              editorial && 'py-3'
+              editorial && !compact && 'py-3'
             )}
           >
             <div className="flex min-w-0 flex-1 items-center gap-[7px]">
@@ -286,11 +292,13 @@ export interface EvaluationScoreWidgetProps {
   evaluation: SkillEvaluation
   /** `full` uses two columns; `core` and `medical` use one each within the skill page's three-column layout. */
   segment?: 'full' | 'core' | 'medical'
+  appearance?: 'default' | 'report'
 }
 
 export function EvaluationScoreWidget({
   evaluation,
-  segment = 'full'
+  segment = 'full',
+  appearance = 'default'
 }: EvaluationScoreWidgetProps) {
   const p = buildEvaluationPanels(evaluation)
 
@@ -303,12 +311,24 @@ export function EvaluationScoreWidget({
   }
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-[3px] border border-[#E2E2E2] bg-white md:flex-row">
+    <div
+      className={cn(
+        'flex flex-col overflow-hidden rounded-[3px] border border-[#E2E2E2] bg-white md:flex-row',
+        appearance === 'report' && 'rounded-none border-[#e7e5de]'
+      )}
+    >
       <CoreCapabilityPanel
         p={p}
+        editorial={appearance === 'report'}
+        compact
         className="min-w-0 flex-1 border-b border-[#E2E2E2] p-5 md:border-b-0 md:border-r md:px-6 md:py-5"
       />
-      <MedicalTaskPanel p={p} className="flex min-w-0 flex-1 flex-col p-5 md:px-6 md:py-5" />
+      <MedicalTaskPanel
+        p={p}
+        editorial={appearance === 'report'}
+        compact
+        className="flex min-w-0 flex-1 flex-col p-5 md:px-6 md:py-5"
+      />
     </div>
   )
 }
