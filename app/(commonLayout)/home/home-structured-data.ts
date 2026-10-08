@@ -16,7 +16,7 @@ export const HOMEPAGE_DESCRIPTION =
 // Keep this fallback tied to the visible product snapshot, not deployment or SEO edit dates.
 export const HOMEPAGE_LAST_MODIFIED = '2026-08-18'
 // UI changes must not rewrite product release dates or video upload dates.
-export const HOMEPAGE_LAYOUT_LAST_MODIFIED = '2026-09-21'
+export const HOMEPAGE_LAYOUT_LAST_MODIFIED = '2026-10-08'
 const HOMEPAGE_VIDEO_ASSET_HOST = 'statics.aipoch.com'
 const OPEN_SCIENCE_VIDEO_DURATION = 'PT1M0.48S'
 const DEFAULT_HOMEPAGE_VIDEO_NAME = 'AIPOCH Open-Science product tour'
@@ -43,6 +43,44 @@ interface HomepageVideoInput {
   url?: string | null
 }
 
+/** Return a Schema.org date only when the source contains a day-level date. */
+const toOptionalSchemaDate = (value?: string | null): string | null => {
+  const raw = value?.trim()
+  if (!raw) return null
+  const isoDate = raw.match(/^(\d{4}-\d{2}-\d{2})(?:T.*)?$/)
+  if (isoDate) {
+    const normalized = isoDate[1]
+    const date = new Date(`${normalized}T00:00:00Z`)
+    return Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== normalized
+      ? null
+      : normalized
+  }
+  const monthDayYear = raw.match(
+    /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2}),\s+(\d{4})$/
+  )
+  if (!monthDayYear) return null
+  const monthByName: Record<string, string> = {
+    Jan: '01',
+    Feb: '02',
+    Mar: '03',
+    Apr: '04',
+    May: '05',
+    Jun: '06',
+    Jul: '07',
+    Aug: '08',
+    Sep: '09',
+    Oct: '10',
+    Nov: '11',
+    Dec: '12'
+  }
+  const month = monthByName[monthDayYear[1]]
+  const normalized = `${monthDayYear[3]}-${month}-${monthDayYear[2].padStart(2, '0')}`
+  const date = new Date(`${normalized}T00:00:00Z`)
+  return Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== normalized
+    ? null
+    : normalized
+}
+
 const resolveHomepageVideoName = (value: string | null | undefined): string => {
   const name = value?.trim()
   if (!name || name.toLowerCase() === 'product tour') {
@@ -53,8 +91,10 @@ const resolveHomepageVideoName = (value: string | null | undefined): string => {
 
 const resolveHomepageVideoFacts = (
   item: HomepageVideoInput | string | null | undefined,
-  uploadDate: string
+  uploadDate?: string | null
 ): HomepageVideoFacts | null => {
+  const normalizedUploadDate = toOptionalSchemaDate(uploadDate)
+  if (!normalizedUploadDate) return null
   const value = typeof item === 'string' ? item : item?.url
   try {
     const url = new URL(value?.trim() ?? '')
@@ -62,7 +102,7 @@ const resolveHomepageVideoFacts = (
       ? {
           name: resolveHomepageVideoName(typeof item === 'string' ? null : item?.name),
           contentUrl: url.href,
-          uploadDate,
+          uploadDate: normalizedUploadDate,
           duration: OPEN_SCIENCE_VIDEO_DURATION
         }
       : null
@@ -79,7 +119,7 @@ const resolveHomepageVideoSchemas = ({
 }: {
   videoUrl?: string | null
   videoItems?: HomepageVideoInput[] | null
-  uploadDate: string
+  uploadDate?: string | null
   organizationId: string
 }): Record<string, unknown>[] => {
   const candidates = [...(videoUrl ? [videoUrl] : []), ...(videoItems ?? [])]
@@ -112,12 +152,14 @@ export const buildHomepageStructuredData = ({
   lastModified,
   videoUrl,
   videoItems,
+  videoUploadDate,
   skillsCount
 }: {
   releaseVersion?: string | null
   lastModified?: string | null
   videoUrl?: string | null
   videoItems?: HomepageVideoInput[] | null
+  videoUploadDate?: string | null
   skillsCount?: number | null
 }): {
   lastUpdated: HomepageLastUpdated
@@ -188,13 +230,14 @@ export const buildHomepageStructuredData = ({
   const videoObjectSchemas = resolveHomepageVideoSchemas({
     videoUrl,
     videoItems,
-    uploadDate: lastUpdated.dateTime,
+    uploadDate: videoUploadDate,
     organizationId: AIPOCH_ORGANIZATION_ID
   })
 
   const softwareApplicationSchema = buildOpenScienceSoftwareApplicationSchema({
     releaseVersion,
-    dateModified: lastUpdated.dateTime
+    // The homepage release label is not necessarily the software entity's verified date.
+    dateModified: toOptionalSchemaDate(lastUpdated.dateTime)
   })
 
   return {

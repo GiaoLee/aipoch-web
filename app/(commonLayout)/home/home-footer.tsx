@@ -6,7 +6,8 @@ const columns = [
   [
     'Resource',
     [
-      ['Github', AIPOCH_GITHUB_URL],
+      ['Open-Science', 'https://github.com/aipoch/open-science'],
+      ['Agent Skills', AIPOCH_GITHUB_URL],
       ['Design System', AIPOCH_DESIGN_SYSTEM_URL]
     ]
   ],

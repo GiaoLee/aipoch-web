@@ -154,7 +154,7 @@ describe('Open-Science page', () => {
     const webpage = schemas.find((item) => item['@type'] === 'WebPage')
     const softwareApplication = schemas.find((item) => item['@type'] === 'SoftwareApplication')
 
-    expect(webpage?.dateModified).toBe('2026-09-23')
+    expect(webpage?.dateModified).toBe('2026-10-08')
     expect(softwareApplication).toMatchObject({
       softwareVersion: 'v1.2.3',
       dateModified: '2026-09-07',
@@ -309,6 +309,7 @@ describe('Open-Science page', () => {
       detectRecommendedDownloadKey('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)')
     ).toBeNull()
     expect(detectRecommendedDownloadKey('Mozilla/5.0 (X11; Linux x86_64)')).toBe('linux-x64-deb')
+    expect(detectRecommendedDownloadKey('Mozilla/5.0 (X11; Linux aarch64)')).toBe('linux-arm64-deb')
     expect(detectRecommendedDownloadKey('Mozilla/5.0 (Linux; Android 14)')).toBeNull()
   })
 

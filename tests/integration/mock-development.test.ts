@@ -77,24 +77,37 @@ describe('mock development end to end', () => {
     ]) {
       const response = await fetch(`${web}${path}`)
       expect(response.status).toBe(200)
-      expect(await response.text()).toContain(content)
+      const html = await response.text()
+      expect(html).toContain(content)
+      if (path === '/agent-skills/literature-review') {
+        const schemas = [
+          ...html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>(.*?)<\/script>/g)
+        ].flatMap((match) => JSON.parse(match[1]))
+        expect(schemas.find((schema) => schema['@type'] === 'WebPage')).toMatchObject({
+          dateModified: '2026-10-08'
+        })
+        expect(schemas.find((schema) => schema['@type'] === 'SoftwareApplication')).toMatchObject({
+          dateModified: '2026-09-01T00:00:00.000Z',
+          datePublished: '2026-09-01T00:00:00.000Z'
+        })
+      }
     }
     expect((await fetch(`${web}/community/posts/1`)).status).toBe(404)
     const sitemap = await (await fetch(`${web}/sitemap.xml`)).text()
     expect(sitemap).toContain('/agent-skills/literature-review</loc>')
     for (const [path, date] of [
-      ['', '2026-09-23'],
-      ['/agent-skills/list', '2026-09-23'],
-      ['/agent-skills/literature-review', '2026-09-23'],
-      ['/blog', '2026-09-23'],
-      ['/blog/release-notes', '2026-09-23']
+      ['', '2026-10-08'],
+      ['/agent-skills/list', '2026-10-08'],
+      ['/agent-skills/literature-review', '2026-10-08'],
+      ['/blog', '2026-10-08'],
+      ['/blog/release-notes', '2026-10-08']
     ]) {
       expect(sitemap).toContain(
         `<loc>https://aipoch.com${path}</loc>\n<lastmod>${date}T00:00:00.000Z</lastmod>`
       )
     }
     expect(sitemap).toContain(
-      '<loc>https://aipoch.com/open-science/download</loc>\n<lastmod>2026-09-23T00:00:00.000Z</lastmod>'
+      '<loc>https://aipoch.com/open-science/download</loc>\n<lastmod>2026-10-08T00:00:00.000Z</lastmod>'
     )
     expect(sitemap).not.toContain('/leaderboard')
     expect(sitemap).not.toContain('/claim/')
@@ -111,7 +124,7 @@ describe('mock development end to end', () => {
       const header = page.locator('article header')
       expect(await header.innerText()).toContain('MIN READ')
       await browserExpect(header.locator('time')).toHaveText('Sep 1, 2026')
-      const metadata = header.locator('time').locator('..')
+      const metadata = header.locator('time').locator('../..')
       expect(await metadata.innerText()).toMatch(/Sep 1, 2026[\s\S]+3 MIN READ/)
       const contentGap = await page
         .locator('.blog-article-body .markdown-body > :first-child')
@@ -561,7 +574,7 @@ describe('mock development end to end', () => {
         const schemas = await page.locator('script[type="application/ld+json"]').allTextContents()
         const parsed = schemas.map((schema) => JSON.parse(schema))
         expect(parsed.find((schema) => schema['@type'] === 'WebPage').dateModified).toBe(
-          '2026-09-23'
+          '2026-10-08'
         )
         expect(
           parsed.find((schema) => schema['@type'] === 'SoftwareApplication').dateModified

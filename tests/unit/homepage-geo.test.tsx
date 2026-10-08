@@ -61,13 +61,15 @@ describe('homepage GEO contracts', () => {
 
     const { schemas: trustedVideoSchemas } = buildHomepageStructuredData({
       releaseVersion: 'v0.17.0',
-      videoUrl: 'https://statics.aipoch.com/public/operations/releases/0-17-0/new'
+      videoUrl: 'https://statics.aipoch.com/public/operations/releases/0-17-0/new',
+      videoUploadDate: '2026-08-16'
     })
     expect(trustedVideoSchemas.find((schema) => schema['@type'] === 'VideoObject')).toMatchObject({
       contentUrl: 'https://statics.aipoch.com/public/operations/releases/0-17-0/new'
     })
 
     const { schemas: multipleVideoSchemas } = buildHomepageStructuredData({
+      videoUploadDate: '2026-08-16',
       videoItems: [
         {
           name: 'Product tour',
@@ -113,7 +115,7 @@ describe('homepage GEO contracts', () => {
       dateTime: 'Aug 4, 2026',
       label: 'Aug 4, 2026'
     })
-    expect(webpage?.dateModified).toBe('2026-09-23')
+    expect(webpage?.dateModified).toBe('2026-10-08')
     expect(softwareApplication).toMatchObject({
       softwareVersion: 'v0.20.4',
       dateModified: '2026-08-04',
@@ -236,7 +238,7 @@ console.log(renderToStaticMarkup(await Home()))`
     expect(schemas.find((schema) => schema['@type'] === 'WebPage')).toMatchObject({
       '@id': 'https://aipoch.com/#webpage',
       url: 'https://aipoch.com',
-      dateModified: '2026-09-23',
+      dateModified: '2026-10-08',
       speakable: {
         '@type': 'SpeakableSpecification',
         cssSelector: ['[data-testid="spotlight-title"]', '[data-homepage-summary]']
@@ -253,16 +255,9 @@ console.log(renderToStaticMarkup(await Home()))`
       ]
     })
     const videoSchemas = schemas.filter((schema) => schema['@type'] === 'VideoObject')
-    expect(videoSchemas).toHaveLength(1)
-    expect(videoSchemas[0]).toMatchObject({
-      contentUrl:
-        'https://statics.aipoch.com/public/operations/releases/0-16-0/OpenScienceUpdate0_16_0.mp4',
-      uploadDate: 'Aug 16, 2026',
-      duration: 'PT1M0.48S',
-      publisher: { '@id': 'https://aipoch.com/#organization' }
-    })
+    expect(videoSchemas).toHaveLength(0)
     expect(schemas.find((schema) => schema['@type'] === 'SoftwareApplication')).toMatchObject({
-      name: 'Open-Science',
+      name: 'AIPOCH Open-Science',
       softwareVersion: 'v0.16.0',
       downloadUrl: 'https://github.com/aipoch/open-science/releases/latest',
       license: 'https://www.apache.org/licenses/LICENSE-2.0',

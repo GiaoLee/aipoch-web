@@ -25,7 +25,7 @@ mock.module('@/lib/config', () => ({
 mock.module('@/service/blog', () => ({
   fetchBlogSitemap: async () => [
     { url: `${siteDomain}/blog/existing-post`, last_modified: '2026-08-12' },
-    { url: `${siteDomain}/blog/newer-post`, last_modified: '2026-09-24T08:00:00Z' }
+    { url: `${siteDomain}/blog/newer-post`, last_modified: '2026-10-09T08:00:00Z' }
   ]
 }))
 
@@ -63,7 +63,7 @@ globalThis.fetch = mock(async (input) => {
             change_frequency: 'weekly',
             priority: 0.8
           },
-          { url: `${siteDomain}/agent-skills/newer-skill`, last_modified: '2026-09-24T08:00:00Z' },
+          { url: `${siteDomain}/agent-skills/newer-skill`, last_modified: '2026-10-09T08:00:00Z' },
           { url: `${siteDomain}/agent-skills/undated-skill`, last_modified: 'invalid' }
         ]
       })
@@ -109,51 +109,51 @@ describe('sitemap', () => {
       (route) => route.url === `${siteDomain}/guides/what-is-a-skill`
     )
 
-    expect((homepageRoute?.lastModified as Date).toISOString()).toBe('2026-09-23T00:00:00.000Z')
+    expect((homepageRoute?.lastModified as Date).toISOString()).toBe('2026-10-08T00:00:00.000Z')
 
     expect(openScienceRoute).toMatchObject({
       changeFrequency: 'weekly',
       priority: 0.8
     })
-    expect((openScienceRoute?.lastModified as Date).toISOString()).toBe('2026-09-23T00:00:00.000Z')
+    expect((openScienceRoute?.lastModified as Date).toISOString()).toBe('2026-10-08T00:00:00.000Z')
 
     expect(openScienceDownloadRoute).toMatchObject({
       changeFrequency: 'weekly',
       priority: 0.8
     })
     expect((openScienceDownloadRoute?.lastModified as Date).toISOString()).toBe(
-      '2026-09-23T00:00:00.000Z'
+      '2026-10-08T00:00:00.000Z'
     )
 
     expect(medFlowRoute).toMatchObject({
       changeFrequency: 'monthly',
       priority: 0.8
     })
-    expect((medFlowRoute?.lastModified as Date).toISOString()).toBe('2026-09-23T00:00:00.000Z')
+    expect((medFlowRoute?.lastModified as Date).toISOString()).toBe('2026-10-08T00:00:00.000Z')
 
     expect(agentSkillsRoute).toMatchObject({
       changeFrequency: 'weekly',
       priority: 0.8
     })
-    expect((agentSkillsRoute?.lastModified as Date).toISOString()).toBe('2026-09-23T00:00:00.000Z')
+    expect((agentSkillsRoute?.lastModified as Date).toISOString()).toBe('2026-10-08T00:00:00.000Z')
 
     expect(medSkillAuditRoute).toMatchObject({
       changeFrequency: 'monthly',
       priority: 0.8
     })
     expect((medSkillAuditRoute?.lastModified as Date).toISOString()).toBe(
-      '2026-09-23T00:00:00.000Z'
+      '2026-10-08T00:00:00.000Z'
     )
-    expect((skillsListRoute?.lastModified as Date).toISOString()).toBe('2026-09-23T00:00:00.000Z')
-    expect((skillDetailRoute?.lastModified as Date).toISOString()).toBe('2026-09-23T00:00:00.000Z')
-    expect((blogRoute?.lastModified as Date).toISOString()).toBe('2026-09-23T00:00:00.000Z')
+    expect((skillsListRoute?.lastModified as Date).toISOString()).toBe('2026-10-08T00:00:00.000Z')
+    expect((skillDetailRoute?.lastModified as Date).toISOString()).toBe('2026-10-08T00:00:00.000Z')
+    expect((blogRoute?.lastModified as Date).toISOString()).toBe('2026-10-08T00:00:00.000Z')
     expect(guidesIndexRoute).toBeUndefined()
     expect(guideDetailRoute).toMatchObject({
       url: `${siteDomain}/guides/what-is-a-skill`,
       changeFrequency: 'weekly',
       priority: 0.7
     })
-    expect((guideDetailRoute?.lastModified as Date).toISOString()).toBe('2026-09-23T00:00:00.000Z')
+    expect((guideDetailRoute?.lastModified as Date).toISOString()).toBe('2026-10-08T00:00:00.000Z')
     expect(routes.some((route) => route.url === `${siteDomain}/community`)).toBe(false)
     expect(routes.some((route) => route.url === `${siteDomain}/medflow-redesign`)).toBe(false)
   })
@@ -169,7 +169,7 @@ describe('sitemap', () => {
       `${siteDomain}/guides/build-your-own-skill`
     ])
     for (const route of guideRoutes) {
-      expect((route.lastModified as Date).toISOString()).toBe('2026-09-23T00:00:00.000Z')
+      expect((route.lastModified as Date).toISOString()).toBe('2026-10-08T00:00:00.000Z')
     }
   })
 
@@ -179,14 +179,14 @@ describe('sitemap', () => {
     const routeDate = (url: string) =>
       (routes.find((route) => route.url === url)?.lastModified as Date)?.toISOString()
 
-    expect(routeDate(`${siteDomain}/blog`)).toBe('2026-09-23T00:00:00.000Z')
-    expect(routeDate(`${siteDomain}/agent-skills/list`)).toBe('2026-09-23T00:00:00.000Z')
-    expect(routeDate(`${siteDomain}/blog/existing-post`)).toBe('2026-09-23T00:00:00.000Z')
-    expect(routeDate(`${siteDomain}/blog/newer-post`)).toBe('2026-09-24T08:00:00.000Z')
+    expect(routeDate(`${siteDomain}/blog`)).toBe('2026-10-08T00:00:00.000Z')
+    expect(routeDate(`${siteDomain}/agent-skills/list`)).toBe('2026-10-08T00:00:00.000Z')
+    expect(routeDate(`${siteDomain}/blog/existing-post`)).toBe('2026-10-08T00:00:00.000Z')
+    expect(routeDate(`${siteDomain}/blog/newer-post`)).toBe('2026-10-09T08:00:00.000Z')
     expect(routeDate(`${siteDomain}/docs/getting-started`)).toBe('2026-08-17T08:30:00.000Z')
     for (const route of routes.filter((route) => !route.url.startsWith(`${siteDomain}/docs/`))) {
       expect(new Date(route.lastModified as Date).getTime()).toBeGreaterThanOrEqual(
-        Date.parse('2026-09-23')
+        Date.parse('2026-10-08')
       )
     }
     for (const excluded of ['/guides', '/community', '/claim/private-token']) {
@@ -202,10 +202,10 @@ describe('sitemap', () => {
         routes.find((route) => route.url === `${siteDomain}/agent-skills/${slug}`)
           ?.lastModified as Date
       )?.toISOString()
-    expect(date('demo-skill')).toBe('2026-09-23T00:00:00.000Z')
-    expect(date('newer-skill')).toBe('2026-09-24T08:00:00.000Z')
-    expect(date('undated-skill')).toBe('2026-09-23T00:00:00.000Z')
-    expect(date('list')).toBe('2026-09-23T00:00:00.000Z')
+    expect(date('demo-skill')).toBe('2026-10-08T00:00:00.000Z')
+    expect(date('newer-skill')).toBe('2026-10-09T08:00:00.000Z')
+    expect(date('undated-skill')).toBe('2026-10-08T00:00:00.000Z')
+    expect(date('list')).toBe('2026-10-08T00:00:00.000Z')
     expect(routes.some((route) => route.url.includes('/leaderboard'))).toBe(false)
   })
 
