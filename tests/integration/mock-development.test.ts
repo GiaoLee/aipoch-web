@@ -4,7 +4,11 @@ import { createServer } from 'node:net'
 import { join } from 'node:path'
 import { expect as browserExpect, chromium, devices } from '@playwright/test'
 import manifestSample from '../../mocks/fixtures/use-case-manifest.json'
-import { verifyReplayCoverage, verifyReplayLoading } from './use-case-replay-browser'
+import {
+  verifyReplayCoverage,
+  verifyReplayDownload,
+  verifyReplayLoading
+} from './use-case-replay-browser'
 
 const reviewArtifacts = join(process.cwd(), '.codex/ui-review-2026-09-21')
 
@@ -279,6 +283,7 @@ describe('mock development end to end', () => {
       await page.getByText(`Local sample replay for ${item.title}.`, { exact: true }).waitFor()
       await page.goto(`${web}/open-science/use-cases/no-such-case/replay`)
       await page.getByRole('alert').filter({ hasText: 'Research package not found.' }).waitFor()
+      expect(await page.getByRole('link', { name: 'Download research package' }).count()).toBe(0)
       expect(await page.getByRole('button', { name: 'Retry', exact: true }).count()).toBe(1)
     } finally {
       await browser.close()
@@ -321,6 +326,7 @@ describe('mock development end to end', () => {
   for (const mobile of [false, true]) {
     for (const [name, verify] of [
       ['renderer coverage', verifyReplayCoverage],
+      ['package download', verifyReplayDownload],
       ['loading and retry', verifyReplayLoading]
     ] as const) {
       test(`${mobile ? 'mobile' : 'desktop'}: replay ${name} uses server-provided package information`, async () => {
@@ -358,7 +364,7 @@ describe('mock development end to end', () => {
           ...html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>(.*?)<\/script>/g)
         ].flatMap((match) => JSON.parse(match[1]))
         expect(schemas.find((schema) => schema['@type'] === 'WebPage')).toMatchObject({
-          dateModified: '2026-10-08'
+          dateModified: '2026-10-09'
         })
         expect(schemas.find((schema) => schema['@type'] === 'SoftwareApplication')).toMatchObject({
           dateModified: '2026-09-01T00:00:00.000Z',
@@ -370,18 +376,18 @@ describe('mock development end to end', () => {
     const sitemap = await (await fetch(`${web}/sitemap.xml`)).text()
     expect(sitemap).toContain('/agent-skills/literature-review</loc>')
     for (const [path, date] of [
-      ['', '2026-10-08'],
-      ['/agent-skills/list', '2026-10-08'],
-      ['/agent-skills/literature-review', '2026-10-08'],
-      ['/blog', '2026-10-08'],
-      ['/blog/release-notes', '2026-10-08']
+      ['', '2026-10-09'],
+      ['/agent-skills/list', '2026-10-09'],
+      ['/agent-skills/literature-review', '2026-10-09'],
+      ['/blog', '2026-10-09'],
+      ['/blog/release-notes', '2026-10-09']
     ]) {
       expect(sitemap).toContain(
         `<loc>https://aipoch.com${path}</loc>\n<lastmod>${date}T00:00:00.000Z</lastmod>`
       )
     }
     expect(sitemap).toContain(
-      '<loc>https://aipoch.com/open-science/download</loc>\n<lastmod>2026-10-08T00:00:00.000Z</lastmod>'
+      '<loc>https://aipoch.com/open-science/download</loc>\n<lastmod>2026-10-09T00:00:00.000Z</lastmod>'
     )
     expect(sitemap).not.toContain('/leaderboard')
     expect(sitemap).not.toContain('/claim/')
@@ -876,7 +882,7 @@ describe('mock development end to end', () => {
         const schemas = await page.locator('script[type="application/ld+json"]').allTextContents()
         const parsed = schemas.map((schema) => JSON.parse(schema))
         expect(parsed.find((schema) => schema['@type'] === 'WebPage').dateModified).toBe(
-          '2026-10-08'
+          '2026-10-09'
         )
         expect(
           parsed.find((schema) => schema['@type'] === 'SoftwareApplication').dateModified

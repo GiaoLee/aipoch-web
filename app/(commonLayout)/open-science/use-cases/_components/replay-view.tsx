@@ -1,5 +1,6 @@
 'use client'
 
+import { Download } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useTransition } from 'react'
@@ -8,18 +9,24 @@ import { loadReplay, type ReplayState } from '@/lib/science-package/load'
 import type { UseCasePackage } from '@/lib/use-case-types'
 import { SessionTranscript } from './session-transcript'
 
-const TopBar = ({ slug }: { slug: string }) => (
+const TopBar = ({ slug, packageUrl }: { slug: string; packageUrl?: string }) => (
   <div className="sticky top-[var(--nav-h)] z-10 border-b border-[#dfdfda] bg-[#fafaf8]/90 backdrop-blur-sm">
-    <div className="mx-auto flex min-h-[47px] w-full max-w-4xl items-center gap-3 px-4 py-2.5 md:px-6">
+    <div className="mx-auto flex min-h-[47px] w-full max-w-4xl flex-wrap items-center gap-3 px-4 py-2.5 md:px-6">
       <Link
         href={`/open-science/use-cases/${slug}`}
         className="shrink-0 text-[13px] font-medium text-[#575853] transition-colors hover:text-[#10110f]"
       >
         ← Back to overview
       </Link>
-      <span className="ml-auto hidden truncate text-right text-[11px] uppercase tracking-[0.04em] text-[#90908a] sm:inline">
-        Read-only replay of an exported Open-Science session
-      </span>
+      {packageUrl ? (
+        <a
+          href={packageUrl}
+          className="ml-auto inline-flex items-center gap-1.5 text-[13px] font-medium text-[#575853] transition-colors hover:text-[#10110f]"
+        >
+          <Download className="size-4 shrink-0" aria-hidden="true" />
+          Download research package
+        </a>
+      ) : null}
     </div>
   </div>
 )
@@ -50,9 +57,17 @@ const ReplayProgress = ({ progress }: { progress: PackageProgress | { stage: 'me
   )
 }
 
-const ReplayFrame = ({ slug, children }: { slug: string; children: React.ReactNode }) => (
+const ReplayFrame = ({
+  slug,
+  packageUrl,
+  children
+}: {
+  slug: string
+  packageUrl?: string
+  children: React.ReactNode
+}) => (
   <main id="top" className="-mt-[var(--nav-h)] flex-1 bg-[#fafaf8] pt-[var(--nav-h)]">
-    <TopBar slug={slug} />
+    <TopBar slug={slug} packageUrl={packageUrl} />
     {children}
   </main>
 )
@@ -89,7 +104,7 @@ export const ReplayView = ({
       : undefined
     : (error ?? 'Research package not found.')
   return (
-    <ReplayFrame slug={slug}>
+    <ReplayFrame slug={slug} packageUrl={packageInfo?.url}>
       {refreshing ? (
         <ReplayProgress progress={{ stage: 'metadata' }} />
       ) : failure ? (
