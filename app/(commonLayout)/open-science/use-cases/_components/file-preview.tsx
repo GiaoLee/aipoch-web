@@ -23,6 +23,7 @@ import {
   useRef,
   useState
 } from 'react'
+import { ExtensionPreservingFileName } from './extension-preserving-file-name'
 import { SessionMarkdown } from './session-markdown'
 
 // In-site preview for exported session files. Kinds the browser can render
@@ -66,6 +67,12 @@ export const previewKindFor = (name: string, mimeType?: string): PreviewKind | n
   if (mimeType?.startsWith('text/') || TEXT_EXTENSIONS.includes(ext)) return 'text'
   return null
 }
+
+// SVG blobs keep image/svg+xml so <img> renders them, but navigating to one as
+// a top-level document would run its scripts same-origin — downloads and inline
+// images are the only offered exits, never "open in a new tab".
+export const canOpenInNewTab = (file: PreviewFile): boolean =>
+  file.mimeType !== 'image/svg+xml' && extensionOf(file.name) !== 'svg'
 
 const isTextKind = (kind: PreviewKind | null): kind is 'markdown' | 'json' | 'csv' | 'text' =>
   kind === 'markdown' || kind === 'json' || kind === 'csv' || kind === 'text'
@@ -357,9 +364,10 @@ const FilePreviewDialog = ({ file, onClose }: { file: PreviewFile; onClose: () =
       >
         <div className="flex items-center gap-2 border-b border-border-200/70 px-4 py-3">
           <FileText className="size-4 shrink-0 text-text-300" aria-hidden="true" />
-          <p className="min-w-0 flex-1 truncate text-[13px] font-medium text-text-000">
-            {file.name}
-          </p>
+          <ExtensionPreservingFileName
+            name={file.name}
+            className="min-w-0 flex-1 text-[13px] font-medium text-text-000"
+          />
           {isTextKind(kind) && textState.text !== undefined ? (
             <button
               type="button"
@@ -375,16 +383,18 @@ const FilePreviewDialog = ({ file, onClose }: { file: PreviewFile; onClose: () =
               )}
             </button>
           ) : null}
-          <a
-            href={file.url}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Open in a new tab"
-            title="Open in a new tab"
-            className={iconButtonClassName}
-          >
-            <ExternalLink className="size-3.5" aria-hidden="true" />
-          </a>
+          {canOpenInNewTab(file) ? (
+            <a
+              href={file.url}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Open in a new tab"
+              title="Open in a new tab"
+              className={iconButtonClassName}
+            >
+              <ExternalLink className="size-3.5" aria-hidden="true" />
+            </a>
+          ) : null}
           <a
             href={file.url}
             download={file.name}
