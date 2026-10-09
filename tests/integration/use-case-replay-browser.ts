@@ -1,5 +1,43 @@
 import { expect, type Page } from '@playwright/test'
 
+export async function verifyReplayDownload(page: Page, url: string) {
+  await page.goto(url.replace(/\/replay$/, ''))
+  const overviewDownload = page.getByRole('link', {
+    name: 'Download research package',
+    exact: true
+  })
+  const packageUrl = await overviewDownload.getAttribute('href')
+  if (!packageUrl) throw new Error('Missing overview package URL')
+
+  await page.getByRole('link', { name: 'View the research session', exact: true }).click()
+  await expect(page).toHaveURL(url)
+  const downloadLink = page.getByRole('link', { name: 'Download research package', exact: true })
+  await expect(downloadLink).toBeVisible()
+  await expect(downloadLink).toHaveAttribute('href', packageUrl)
+  await expect(downloadLink.locator('svg[aria-hidden="true"]')).toBeVisible()
+  await expect(
+    page.getByText('Read-only replay of an exported Open-Science session', { exact: true })
+  ).toHaveCount(0)
+
+  const backLink = page.getByRole('link', { name: 'Back to overview' })
+  await expect(backLink).toBeVisible()
+  const textStyle = (element: HTMLElement | SVGElement) => {
+    const style = getComputedStyle(element)
+    return { color: style.color, fontSize: style.fontSize, fontWeight: style.fontWeight }
+  }
+  expect(await downloadLink.evaluate(textStyle)).toEqual(await backLink.evaluate(textStyle))
+  const box = await downloadLink.boundingBox()
+  const viewport = page.viewportSize()
+  if (!box || !viewport) throw new Error('Missing visible download link or viewport')
+  expect(box.x).toBeGreaterThanOrEqual(0)
+  expect(box.x + box.width).toBeLessThanOrEqual(viewport.width)
+
+  const [download] = await Promise.all([page.waitForEvent('download'), downloadLink.click()])
+  expect(download.url()).toBe(packageUrl)
+  expect(await download.failure()).toBeNull()
+  await expect(page).toHaveURL(url)
+}
+
 // Run against the real mock Next server: package metadata now arrives in the RSC response.
 export async function verifyReplayCoverage(page: Page, url: string) {
   let downloads = 0
@@ -179,6 +217,8 @@ export async function verifyReplayLoading(page: Page, url: string) {
   })
   await page.goto(url)
   await expect(page.getByRole('status')).toHaveText('Downloading research package…')
+  const downloadLink = page.getByRole('link', { name: 'Download research package', exact: true })
+  await expect(downloadLink).toBeVisible()
   await expect(page.getByRole('progressbar')).not.toHaveAttribute('value')
   await page.waitForFunction(
     () => (window as unknown as { replayTestWorkers: unknown[] }).replayTestWorkers.length === 1
@@ -210,6 +250,7 @@ export async function verifyReplayLoading(page: Page, url: string) {
   await expect(page.locator('main').getByRole('alert')).toContainText(
     'Package SHA-256 verification failed.'
   )
+  await expect(downloadLink).toBeVisible()
   await page.getByRole('button', { name: 'Retry', exact: true }).click()
   await page.waitForFunction(
     () => (window as unknown as { replayTestWorkers: unknown[] }).replayTestWorkers.length === 2

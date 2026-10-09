@@ -215,7 +215,7 @@ export default async function OpenScienceUseCaseIntroPage({ params }: PageProps)
           </div>
 
           {heroImageUrl ? (
-            <div className="mt-[130px] overflow-hidden border border-[#e4e4df] bg-white">
+            <div className="mt-8 overflow-hidden border border-[#e4e4df] bg-white">
               {/* biome-ignore lint/performance/noImgElement: exported artifact asset, no Next image rewriting needed. */}
               <img
                 src={heroImageUrl}
