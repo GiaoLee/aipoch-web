@@ -287,7 +287,7 @@ test('switches workflow details and matching images with pointer and keyboard', 
 }) => {
   const workbench = page.locator('#open-science')
   const preview = page.getByTestId('workflow-preview').getByRole('img')
-  for (const step of ['Plan', 'Execute', 'Produce', 'Review']) {
+  for (const step of ['Plan', 'Execute', 'Produce', 'Review', 'Share']) {
     const button = workbench.getByRole('button', { name: step, exact: true })
     await button.click()
     await expect(button).toHaveAttribute('aria-expanded', 'true')
@@ -297,13 +297,27 @@ test('switches workflow details and matching images with pointer and keyboard', 
       `/figma/landing/workflow-${step.toLowerCase()}.png`
     )
     await expect(workbench.getByRole('link', { name: 'Learn more' })).toHaveCount(1)
+    await expect(workbench.getByRole('link', { name: 'Learn more' })).toHaveAttribute(
+      'href',
+      '/open-science'
+    )
     await expect
       .poll(() => preview.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0))
       .toBe(true)
   }
-  await workbench.getByRole('button', { name: 'Review', exact: true }).press('ArrowUp')
-  await expect(workbench.getByRole('button', { name: 'Produce', exact: true })).toBeFocused()
-  await expect(preview).toHaveAttribute('src', '/figma/landing/workflow-produce.png')
+  await expect(workbench.locator('#workflow-share-detail')).toContainText(
+    'Export a session as a portable .science package'
+  )
+  await workbench.getByRole('button', { name: 'Share', exact: true }).press('ArrowUp')
+  await expect(workbench.getByRole('button', { name: 'Review', exact: true })).toBeFocused()
+  await expect(preview).toHaveAttribute('src', '/figma/landing/workflow-review.png')
+  await page.keyboard.press('End')
+  await expect(workbench.getByRole('button', { name: 'Share', exact: true })).toBeFocused()
+  await expect(preview).toHaveAttribute('src', '/figma/landing/workflow-share.png')
+  await page.keyboard.press('ArrowDown')
+  await expect(workbench.getByRole('button', { name: 'Plan', exact: true })).toBeFocused()
+  await page.keyboard.press('ArrowUp')
+  await expect(workbench.getByRole('button', { name: 'Share', exact: true })).toBeFocused()
   await page.keyboard.press('Home')
   await expect(workbench.getByRole('button', { name: 'Plan', exact: true })).toHaveAttribute(
     'aria-expanded',
