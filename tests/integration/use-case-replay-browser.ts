@@ -69,7 +69,9 @@ export async function verifyReplayDownload(page: Page, url: string) {
 // Run against the real mock Next server: package metadata now arrives in the RSC response.
 export async function verifyReplayCoverage(page: Page, url: string) {
   let downloads = 0
+  const requestedUrls = new Set<string>()
   page.context().on('request', (request) => {
+    requestedUrls.add(request.url())
     if (!request.serviceWorker() && new URL(request.url()).pathname.endsWith('.science'))
       downloads++
   })
@@ -85,6 +87,10 @@ export async function verifyReplayCoverage(page: Page, url: string) {
   await page
     .getByText('Run the renderer coverage scenario.', { exact: true })
     .waitFor({ timeout: 30000 })
+
+  // The consent banner can cover artifact cards on narrow viewports.
+  const rejectCookies = page.getByRole('button', { name: 'Reject non-essential', exact: true })
+  if (await rejectCookies.isVisible()) await rejectCookies.click()
 
   // -- user bubble -------------------------------------------------------------
   await expect(page.getByText('Run the renderer coverage scenario.')).toBeVisible()
@@ -194,18 +200,44 @@ export async function verifyReplayCoverage(page: Page, url: string) {
 
   // -- artifact gallery: 4 states -----------------------------------------------------
   // content-visibility renders offscreen rows lazily — bring the gallery into view first.
-  await page.getByText('GENERATED · 4').scrollIntoViewIfNeeded()
-  await expect(page.getByText('GENERATED · 4')).toBeVisible()
+  await page.getByText('GENERATED · 9').scrollIntoViewIfNeeded()
+  await expect(page.getByText('GENERATED · 9')).toBeVisible()
   await expect(page.getByTitle('Preview coverage_chart.png')).toBeVisible()
   await expect(page.getByTitle('Preview coverage_report.md')).toBeVisible()
   await expect(page.getByTitle(/Download coverage_dataset\.zip/)).toBeVisible()
   await expect(page.getByText('Full only', { exact: true })).toHaveCount(0)
-  await expect(page.getByTitle(/Download coverage_huge.bin/)).toHaveAttribute('href', /^blob:/)
+  await expect(page.getByTitle(/Download coverage_huge.bin/)).toHaveAttribute(
+    'href',
+    /\/extracted\/files\//
+  )
+
+  // S3 preserves extensionless objects with a generic MIME type; SVG must still render.
+  await page.getByRole('button', { name: 'Expand generated files' }).click()
+  const vectorCard = page.getByTitle('Preview coverage_vector.svg')
+  await vectorCard.scrollIntoViewIfNeeded()
+  await expect
+    .poll(() => vectorCard.locator('img').evaluate((img: HTMLImageElement) => img.naturalWidth))
+    .toBe(90)
+  await expect
+    .poll(() =>
+      page.getByAltText('Inline vector chart').evaluate((img: HTMLImageElement) => img.naturalWidth)
+    )
+    .toBe(90)
+  await vectorCard.click()
+  const vectorPreview = page.getByRole('dialog', { name: 'coverage_vector.svg', exact: true })
+  await expect
+    .poll(() => vectorPreview.locator('img').evaluate((img: HTMLImageElement) => img.naturalWidth))
+    .toBe(90)
+  await expect(vectorPreview.getByRole('link', { name: /open in.*tab/i })).toHaveCount(0)
+  expect(
+    await page.evaluate(() => (window as typeof window & { svgExecuted?: boolean }).svgExecuted)
+  ).toBeUndefined()
+  await page.keyboard.press('Escape')
 
   // -- inline asset link in message content ---------------------------------------------
   await expect(page.getByRole('link', { name: 'coverage_report.md' }).first()).toHaveAttribute(
     'href',
-    /^blob:/
+    /\/extracted\/files\//
   )
 
   await page.getByRole('link', { name: 'coverage_report.md' }).first().click()
@@ -216,7 +248,49 @@ export async function verifyReplayCoverage(page: Page, url: string) {
   await expect(
     page.getByRole('button', { name: /View full version|Back to essential/ })
   ).toHaveCount(0)
-  expect(downloads).toBe(1)
+  const downloadCard = page.getByTitle(/Download coverage_dataset\.zip/)
+  expect(requestedUrls.has((await downloadCard.getAttribute('href'))?.split('#')[0] ?? '')).toBe(
+    false
+  )
+  await downloadCard.scrollIntoViewIfNeeded()
+  const [download] = await Promise.all([page.waitForEvent('download'), downloadCard.click()])
+  expect(download.suggestedFilename()).toBe('coverage_dataset.zip')
+  expect(await download.failure()).toBeNull()
+  for (const [label, filename] of [
+    ['ZIP archive', 'coverage_dataset.zip'],
+    ['Word document', 'coverage_document.docx']
+  ]) {
+    const link = page.getByRole('link', { name: label, exact: true })
+    const [inlineDownload] = await Promise.all([page.waitForEvent('download'), link.click()])
+    expect(inlineDownload.suggestedFilename()).toBe(filename)
+    expect(await inlineDownload.failure()).toBeNull()
+  }
+  for (const [label, filename] of [
+    ['closing parenthesis', 'report).md'],
+    ['opening parenthesis', 'report(.md']
+  ]) {
+    await page.getByRole('link', { name: label, exact: true }).click()
+    const dialog = page.getByRole('dialog', { name: filename, exact: true })
+    await expect(dialog.getByText(`Sample ${filename}`, { exact: true })).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(dialog).not.toBeVisible()
+  }
+  await page.getByTitle('Preview coverage_paper.pdf').click()
+  const pdfDialog = page.getByRole('dialog', { name: 'coverage_paper.pdf', exact: true })
+  const pdfFrame = pdfDialog.locator('iframe')
+  await expect(pdfFrame).toHaveAttribute('src', /^blob:/)
+  const pdfUrl = await pdfFrame.getAttribute('src')
+  expect(
+    await page.evaluate(async (url) => {
+      const response = await fetch(url as string)
+      return {
+        type: response.headers.get('content-type'),
+        prefix: (await response.text()).slice(0, 8)
+      }
+    }, pdfUrl)
+  ).toEqual({ type: 'application/pdf', prefix: '%PDF-1.4' })
+  await page.keyboard.press('Escape')
+  expect(downloads).toBe(0)
 
   // -- global hygiene ----------------------------------------------------------------------
   const bodyText = await page.locator('body').innerText()
@@ -244,7 +318,7 @@ export async function verifyReplayLoading(page: Page, url: string) {
     Object.assign(window, { Worker: ControlledWorker })
   })
   await page.goto(url)
-  await expect(page.getByRole('status')).toHaveText('Downloading research package…')
+  await expect(page.getByRole('status')).toHaveText('Loading research session…')
   const downloadLink = page.getByRole('link', { name: 'Download research package', exact: true })
   await expect(downloadLink).toBeVisible()
   await expect(page.getByRole('progressbar')).not.toHaveAttribute('value')
@@ -290,4 +364,120 @@ export async function verifyReplayLoading(page: Page, url: string) {
           .terminated
     )
   ).toBe(true)
+}
+
+// Keep page state stable through overlapping exit/entry animations and repeated sessions.
+export async function verifyPreviewSwitching(page: Page, url: string) {
+  await page.context().route(/\/extracted\/files\/[^/]+\.md(?:#.*)?$/, async (route) => {
+    const resource = new URL(route.request().url())
+    const current = resource.pathname.split('/').pop()
+    const next = current === 'coverage_report.md' ? 'second.md' : 'third.md'
+    const nextUrl = new URL(next, resource).href
+    await route.fulfill({
+      contentType: 'text/plain',
+      body: `Preview ${current}. [Next preview](${nextUrl}#${next})`
+    })
+  })
+  await page.goto(url)
+  await page.getByText('Run the renderer coverage scenario.', { exact: true }).waitFor()
+  const rejectCookies = page.getByRole('button', { name: 'Reject non-essential', exact: true })
+  if (await rejectCookies.isVisible()) await rejectCookies.click()
+  const trigger = page.getByTitle('Preview coverage_report.md')
+  await trigger.waitFor()
+  await page.evaluate(() => {
+    document.body.style.overflow = 'scroll'
+  })
+  for (let cycle = 0; cycle < 2; cycle++) {
+    await trigger.click()
+    await expect(
+      page.getByRole('dialog', { name: 'coverage_report.md', exact: true })
+    ).toBeVisible()
+    await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe('hidden')
+    await page.evaluate(() => {
+      const state = window as typeof window & {
+        overflowChanges: string[]
+        overflowObserver: MutationObserver
+      }
+      state.overflowChanges = []
+      state.overflowObserver = new MutationObserver(() =>
+        state.overflowChanges.push(document.body.style.overflow)
+      )
+      state.overflowObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['style']
+      })
+    })
+    for (const name of ['second.md', 'third.md']) {
+      await page.getByRole('dialog').getByRole('link', { name: 'Next preview' }).click()
+      await expect(page.getByRole('dialog', { name, exact: true })).toBeVisible()
+      await expect(page.getByRole('dialog')).toHaveCount(1)
+      await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe('hidden')
+    }
+    const changes = await page.evaluate(() => {
+      const state = window as typeof window & {
+        overflowChanges: string[]
+        overflowObserver: MutationObserver
+      }
+      state.overflowObserver.disconnect()
+      return state.overflowChanges
+    })
+    expect(changes.every((value) => value === 'hidden')).toBe(true)
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+    await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe('scroll')
+    await expect(trigger).toBeFocused()
+  }
+}
+
+// Hold the PDF response so the new-tab entry cannot bypass MIME recovery while loading.
+export async function verifySlowPdfPreview(page: Page, url: string) {
+  let release = () => {}
+  const responseGate = new Promise<void>((resolve) => {
+    release = resolve
+  })
+  let downloads = 0
+  let popups = 0
+  page.on('download', () => {
+    downloads++
+  })
+  page.on('popup', () => {
+    popups++
+  })
+  await page.context().route(/\/extracted\/files\/coverage_paper\.pdf(?:#.*)?$/, async (route) => {
+    await responseGate
+    await route.continue()
+  })
+  try {
+    await page.goto(url)
+    await page.getByText('Run the renderer coverage scenario.', { exact: true }).waitFor()
+    const rejectCookies = page.getByRole('button', { name: 'Reject non-essential', exact: true })
+    if (await rejectCookies.isVisible()) await rejectCookies.click()
+    await page.getByTitle('Preview coverage_paper.pdf').click()
+    const dialog = page.getByRole('dialog', { name: 'coverage_paper.pdf', exact: true })
+    await expect(dialog.getByRole('status')).toHaveText('Loading…')
+    const newTab = dialog.getByLabel('Open in a new tab', { exact: true })
+    await expect(newTab).toBeDisabled()
+    expect(await newTab.getAttribute('href')).toBeNull()
+    await newTab.dispatchEvent('click')
+    expect(popups).toBe(0)
+    expect(downloads).toBe(0)
+    release()
+    await expect(newTab).toBeEnabled()
+    await expect(newTab).toHaveAttribute('href', /^blob:/)
+    const pdfUrl = await newTab.getAttribute('href')
+    expect(
+      await page.evaluate(
+        async (href) => (await fetch(href as string)).headers.get('content-type'),
+        pdfUrl
+      )
+    ).toBe('application/pdf')
+    const [popup] = await Promise.all([page.waitForEvent('popup'), newTab.click()])
+    await popup.waitForURL(/^blob:/)
+    expect(downloads).toBe(0)
+    await popup.close()
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+  } finally {
+    release()
+  }
 }

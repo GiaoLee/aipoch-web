@@ -6,6 +6,8 @@ import { createMathPlugin } from '@streamdown/math'
 import { useEffect, useMemo, useState } from 'react'
 import { type Components, defaultRehypePlugins, Streamdown } from 'streamdown'
 import type { PluggableList, Plugin } from 'unified'
+import { AssetImage } from './asset-image'
+import { FileDownloadLink } from './file-download-link'
 import { type PreviewFile, previewKindFor, useFilePreview } from './file-preview'
 import 'katex/dist/katex.min.css'
 
@@ -55,7 +57,7 @@ const controls = {
   }
 } as const
 
-/** Real file name carried in the blob URL fragment, else the label/URL tail. */
+/** Real file name carried in an asset URL fragment, else the label/URL tail. */
 const assetLinkFileName = (href: string, label: string): { name: string; url: string } => {
   const hashIndex = href.indexOf('#')
   const url = hashIndex === -1 ? href : href.slice(0, hashIndex)
@@ -86,13 +88,21 @@ export const resolveAssetLinkTarget = (href: string, label: string): PreviewFile
   return null
 }
 
+const imageComponent: Components['img'] = ({ node: _node, ...props }) => <AssetImage {...props} />
+
 const linkComponent: Components['a'] = ({ node: _node, href, children, ...props }) => {
   const openPreview = useFilePreview()
   // Intercept internal asset links only when a preview provider is mounted
   // (the transcript) and the type is previewable; otherwise fall through to a
   // plain link so the click still opens the file instead of dying on
   // preventDefault + "cannot preview".
-  if ((href?.startsWith('/use-cases/') || href?.startsWith('blob:')) && openPreview) {
+  // Restored storage paths may end in "content"; the loader carries the filename in the fragment.
+  const extracted = href && /^https?:\/\/[^/]+\/(?:[^?#]*\/)?extracted\/[^?#]+#/.test(href)
+  if (
+    href &&
+    (href.startsWith('/use-cases/') || href.startsWith('blob:') || extracted) &&
+    openPreview
+  ) {
     const target = resolveAssetLinkTarget(href, typeof children === 'string' ? children : '')
     if (target) {
       return (
@@ -109,15 +119,16 @@ const linkComponent: Components['a'] = ({ node: _node, href, children, ...props 
       )
     }
   }
-  if (href?.startsWith('blob:')) {
+  if (href && (href.startsWith('blob:') || extracted)) {
     // A blob's served type is whatever the file really is — an svg would run
     // scripts if opened as a top-level document — so non-previewable package
-    // links download instead of navigating.
+    // links download instead of navigating. Remote objects also need a blob download
+    // to preserve the original filename across origins.
     const { name } = assetLinkFileName(href, typeof children === 'string' ? children : '')
     return (
-      <a {...props} href={href} download={name || true}>
+      <FileDownloadLink {...props} href={href} download={name}>
         {children}
-      </a>
+      </FileDownloadLink>
     )
   }
   return (
@@ -154,7 +165,7 @@ const SessionMarkdownStreamdown = ({ content }: { content: string }) => {
         plugins={plugins}
         rehypePlugins={rehypePlugins}
         controls={controls}
-        components={{ a: linkComponent }}
+        components={{ a: linkComponent, img: imageComponent }}
         dir="auto"
         mode="static"
         isAnimating={false}

@@ -3,8 +3,10 @@
 import { Download, Eye, FileText } from 'lucide-react'
 import { useState } from 'react'
 import type { MessageArtifact, TranscriptItem } from '@/lib/use-case-types'
+import { AssetImage } from './asset-image'
 import { CopyButton } from './copy-button'
 import { ExtensionPreservingFileName } from './extension-preserving-file-name'
+import { FileDownloadLink } from './file-download-link'
 import { previewKindFor, useFilePreview } from './file-preview'
 import { SessionMarkdown } from './session-markdown'
 
@@ -70,8 +72,9 @@ const ArtifactCard = ({ artifact }: { artifact: MessageArtifact }) => {
     <>
       <div className="flex h-[56px] w-full items-center justify-center overflow-hidden bg-bg-200">
         {isImage && artifact.url ? (
-          // biome-ignore lint/performance/noImgElement: exported object URLs should render without Next image rewriting.
-          <img
+          <AssetImage
+            filename={artifact.name}
+            mimeType={artifact.mimeType}
             src={artifact.url}
             alt={artifact.name}
             className="size-full object-cover"
@@ -110,14 +113,14 @@ const ArtifactCard = ({ artifact }: { artifact: MessageArtifact }) => {
     )
   }
   return artifact.url ? (
-    <a
+    <FileDownloadLink
       href={artifact.url}
       download={artifact.name}
       className={`relative ${artifactCardClassName}`}
       title={`Download ${artifact.name} (no in-site preview for this type)`}
     >
       {card}
-    </a>
+    </FileDownloadLink>
   ) : (
     <div
       className={`relative ${artifactCardClassName} cursor-default`}

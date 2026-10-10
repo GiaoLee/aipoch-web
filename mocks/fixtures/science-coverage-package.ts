@@ -1,6 +1,11 @@
 import { buildSciencePackage, digest } from './science-package'
 import { coverageFixtureSession } from './use-case-coverage'
 
+// A minimal one-page PDF exercises MIME recovery from content-addressed object storage.
+const pdf = new TextEncoder().encode(
+  '%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 200 200]>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF'
+)
+
 // Convert the renderer corpus into the real export schema, exercising the worker too.
 export function buildCoveragePackage(title = coverageFixtureSession.title) {
   const sample = coverageFixtureSession
@@ -16,12 +21,27 @@ export function buildCoveragePackage(title = coverageFixtureSession.title) {
       const id = `${item.id}-${index}`
       const bytes = artifact.fullOnly
         ? new Uint8Array(3 * 1024 ** 2)
-        : artifact.mimeType === 'image/png'
-          ? Buffer.from(png, 'base64')
-          : new TextEncoder().encode(`Sample ${artifact.name}`)
-      const storageKey = `files/${artifact.name}`
-      objects[`objects/${digest(bytes)}`] = { bytes, storageKey }
-      artifacts.push({ ...artifact, id, path: storageKey, size: bytes.length })
+        : artifact.mimeType === 'application/pdf'
+          ? pdf
+          : artifact.mimeType === 'image/svg+xml'
+            ? new TextEncoder().encode(
+                '<svg xmlns="http://www.w3.org/2000/svg" width="90" height="40"><rect width="90" height="40" fill="blue"/><script>window.svgExecuted=true</script></svg>'
+              )
+            : artifact.mimeType === 'image/png'
+              ? Buffer.from(png, 'base64')
+              : new TextEncoder().encode(`Sample ${artifact.name}`)
+      const storageKey =
+        artifact.mimeType === 'image/svg+xml'
+          ? 'artifacts/mock-project/mock-session/.provenance/vector/versions/v1/content'
+          : `files/${artifact.name}`
+      objects[`objects/${digest(new TextEncoder().encode(storageKey))}`] = { bytes, storageKey }
+      artifacts.push({
+        ...artifact,
+        id,
+        path: storageKey,
+        sha256: digest(bytes),
+        size: bytes.length
+      })
       records.push({ contentStorageKey: storageKey, filename: artifact.name })
       return id
     })
@@ -61,7 +81,11 @@ export function buildCoveragePackage(title = coverageFixtureSession.title) {
     })
   })
   const runBytes = new TextEncoder().encode(JSON.stringify({ runs }))
-  objects[`objects/${digest(runBytes)}`] = { bytes: runBytes, storageKey: 'notebook/run.json' }
+  const runKey = 'notebooks/mock-project/mock-session/run.json'
+  objects[`objects/${digest(new TextEncoder().encode(runKey))}`] = {
+    bytes: runBytes,
+    storageKey: runKey
+  }
   return buildSciencePackage(
     title,
     { messages, artifacts, conversationGraph: { activities } },

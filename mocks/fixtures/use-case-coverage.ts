@@ -363,13 +363,13 @@ export const coverageFixtureSession: UseCaseSession = {
       ]
     },
 
-    // -- assistant message: artifact gallery (4 states) ---------------------------
+    // -- assistant message: artifact gallery (including a PDF) ---------------------------
     {
       type: 'message',
       id: 'cov-md-artifacts',
       role: 'assistant',
       content:
-        'Deliverables are ready, including the [coverage_report.md](/use-cases/coverage-fixture/objects/report.md) inline link.',
+        'Deliverables are ready, including the [coverage_report.md](/use-cases/coverage-fixture/objects/report.md) inline link. Download the [ZIP archive](coverage_dataset.zip) or [Word document](coverage_document.docx). Preview [closing parenthesis](report%29.md) and [opening parenthesis](report%28.md). ![Inline vector chart](coverage_vector.svg)',
       status: 'complete',
       createdAt: 1790133084000,
       completedAt: 1790133085000,
@@ -393,11 +393,25 @@ export const coverageFixtureSession: UseCaseSession = {
           url: '/use-cases/coverage-fixture/objects/dataset.zip'
         },
         {
+          name: 'coverage_paper.pdf',
+          mimeType: 'application/pdf',
+          size: 600,
+          url: '/use-cases/coverage-fixture/objects/paper.pdf'
+        },
+        {
           name: 'coverage_huge.bin',
           mimeType: 'application/octet-stream',
           size: 52428800,
           fullOnly: true
-        }
+        },
+        {
+          name: 'coverage_document.docx',
+          mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          size: 100
+        },
+        { name: 'report).md', mimeType: 'text/markdown', size: 100 },
+        { name: 'report(.md', mimeType: 'text/markdown', size: 100 },
+        { name: 'coverage_vector.svg', mimeType: 'image/svg+xml', size: 100 }
       ]
     }
   ],
