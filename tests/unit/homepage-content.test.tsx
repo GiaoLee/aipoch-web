@@ -184,8 +184,10 @@ describe('Figma homepage with existing live data contracts', () => {
 
   test('includes all workflow descriptions and meaningful static image alternatives', () => {
     const html = render()
-    for (const step of ['plan', 'execute', 'produce', 'review'])
+    for (const step of ['plan', 'execute', 'produce', 'review', 'share'])
       expect(html).toContain(`aria-controls="workflow-${step}-detail"`)
+    expect(html).toContain('Export a session as a portable .science package')
+    expect(html).toContain('conversation branches, selected files, and recorded evidence')
     expect(html).toContain('Open-Science plan workflow preview')
     expect(html).toContain('Search, assess, and synthesize research evidence.')
     expect(html).toContain(
