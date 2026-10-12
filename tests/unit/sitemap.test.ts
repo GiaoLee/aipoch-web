@@ -96,7 +96,7 @@ describe('sitemap', () => {
       '/open-science/use-cases/can-a-simple-algorithm-beat-ai-at-wordle/replay'
     ]) {
       expect(routes.find((route) => route.url === `${siteDomain}${path}`)?.lastModified).toEqual(
-        new Date('2026-10-10')
+        new Date(path === '/open-science/use-cases' ? '2026-10-12' : '2026-10-10')
       )
     }
   })
@@ -135,7 +135,7 @@ describe('sitemap', () => {
       (route) => route.url === `${siteDomain}/guides/what-is-a-skill`
     )
 
-    expect((homepageRoute?.lastModified as Date).toISOString()).toBe('2026-10-10T00:00:00.000Z')
+    expect((homepageRoute?.lastModified as Date).toISOString()).toBe('2026-10-12T00:00:00.000Z')
 
     expect(openScienceRoute).toMatchObject({
       changeFrequency: 'weekly',
