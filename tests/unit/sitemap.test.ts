@@ -88,15 +88,23 @@ describe('sitemap', () => {
     const { default: sitemap } = await import('../../app/sitemap')
     const routes = await sitemap()
     expect(routes.some((route) => route.url.includes('/replay/dot-science'))).toBe(false)
+    // The gallery page was refreshed on October 12; detail pages keep their earlier date.
+    for (const [path, date] of [
+      ['/open-science/use-cases', '2026-10-12'],
+      ['/open-science/use-cases/nvda-all-at-once-or-four-weeks', '2026-10-10'],
+      ['/open-science/use-cases/can-a-simple-algorithm-beat-ai-at-wordle', '2026-10-10']
+    ]) {
+      expect(routes.find((route) => route.url === `${siteDomain}${path}`)?.lastModified).toEqual(
+        new Date(date)
+      )
+    }
+    // The replay transcript rendering was reworked after the gallery pages.
     for (const path of [
-      '/open-science/use-cases',
-      '/open-science/use-cases/nvda-all-at-once-or-four-weeks',
-      '/open-science/use-cases/can-a-simple-algorithm-beat-ai-at-wordle',
       '/open-science/use-cases/nvda-all-at-once-or-four-weeks/replay',
       '/open-science/use-cases/can-a-simple-algorithm-beat-ai-at-wordle/replay'
     ]) {
       expect(routes.find((route) => route.url === `${siteDomain}${path}`)?.lastModified).toEqual(
-        new Date(path === '/open-science/use-cases' ? '2026-10-12' : '2026-10-10')
+        new Date('2026-10-12')
       )
     }
   })
