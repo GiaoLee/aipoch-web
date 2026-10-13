@@ -262,7 +262,7 @@ describe('mock development end to end', () => {
       const sitemap = (await (await fetch(`${web}/sitemap.xml`)).text()).replace(/>\s+</g, '><')
       for (const item of manifestSample) {
         expect(sitemap).toContain(
-          `/open-science/use-cases/${item.name}</loc><lastmod>2026-10-10T00:00:00.000Z</lastmod>`
+          `/open-science/use-cases/${item.name}</loc><lastmod>2026-10-13T00:00:00.000Z</lastmod>`
         )
         expect(sitemap).toContain(
           `/open-science/use-cases/${item.name}/replay</loc><lastmod>2026-10-12T00:00:00.000Z</lastmod>`

@@ -17,9 +17,9 @@ import { fetchOpenScienceWikiSitemap } from '@/service/wiki-sitemap'
 
 const AGENT_SKILLS_LAST_MODIFIED = '2026-09-11'
 const OPEN_SCIENCE_DOWNLOAD_LAST_MODIFIED = '2026-09-30'
-const OPEN_SCIENCE_USE_CASES_LAST_MODIFIED = '2026-10-12'
+const OPEN_SCIENCE_USE_CASES_LAST_MODIFIED = '2026-10-13'
 // Track overview and replay template changes separately from the gallery.
-const OPEN_SCIENCE_USE_CASE_DETAIL_LAST_MODIFIED = '2026-10-10'
+const OPEN_SCIENCE_USE_CASE_DETAIL_LAST_MODIFIED = '2026-10-13'
 // Replay transcript rendering was reworked on October 12.
 const OPEN_SCIENCE_USE_CASE_REPLAY_LAST_MODIFIED = '2026-10-12'
 const AGENT_SKILLS_LIST_LAST_MODIFIED = '2026-09-23'
