@@ -498,10 +498,17 @@ describe('mock development end to end', () => {
           const cards = Array.from(element.children).map((card) => card.getBoundingClientRect())
           const title = element.querySelector('h2')
           const style = title ? getComputedStyle(title) : null
+          const image = element.querySelector('img')
+          const imageRect = image?.getBoundingClientRect()
           return {
             columns: new Set(cards.map((card) => Math.round(card.x))).size,
             cardWidth: cards[0].width,
             cardHeight: cards[0].height,
+            imageRatio: imageRect ? imageRect.width / imageRect.height : undefined,
+            naturalRatio:
+              image?.naturalWidth && image.naturalHeight
+                ? image.naturalWidth / image.naturalHeight
+                : undefined,
             clamp: style?.webkitLineClamp,
             fontSize: style?.fontSize,
             lineHeight: style?.lineHeight,
@@ -515,7 +522,8 @@ describe('mock development end to end', () => {
         expect(geometry.overflow).toBe(false)
         if (!mobile) {
           expect(geometry.cardWidth).toBeCloseTo(408, 0)
-          expect(geometry.cardHeight).toBeCloseTo(288, 0)
+          // #36: cards preserve the cover image's natural proportions.
+          expect(geometry.imageRatio).toBeCloseTo(geometry.naturalRatio ?? 0, 2)
         }
         await page.getByRole('link', { name: 'Load more use cases' }).scrollIntoViewIfNeeded()
         await browserExpect(grid.locator('h2')).toHaveText(manifestSample.map((item) => item.title))
@@ -544,6 +552,46 @@ describe('mock development end to end', () => {
       }
     }, 60000)
   }
+
+  test('category strip filters via the URL and left-aligns with the gallery grid', async () => {
+    const browser = await chromium.launch()
+    try {
+      const page = await (
+        await browser.newContext({ viewport: { width: 1440, height: 700 } })
+      ).newPage()
+      await page.goto(`${web}/open-science/use-cases`)
+      const strip = page.getByRole('list', { name: 'Use case categories' })
+      const allAreas = strip.getByRole('link', { name: /All areas/ })
+      const science = strip.getByRole('link', { name: /^Science/ })
+      // Counts derive from the mock manifest catalog fields (science ×4).
+      await browserExpect(allAreas).toContainText('9')
+      await browserExpect(science).toContainText('4')
+      await browserExpect(allAreas).toHaveAttribute('aria-current', 'true')
+      await science.click()
+      await page.waitForURL('**/open-science/use-cases?category=science')
+      await browserExpect(science).toHaveAttribute('aria-current', 'true')
+      // The grid filters to the selected catalog.
+      await browserExpect(page.getByTestId('use-case-grid').locator('h2')).toHaveCount(4)
+      await page.getByRole('link', { name: /All areas/ }).click()
+      await page.waitForURL('**/open-science/use-cases')
+      // Unfiltered again: a Health & Climate card is back in the grid. (The
+      // scroll sentinel may already have auto-loaded extra batches, so don't
+      // pin an exact card count here.)
+      await browserExpect(
+        page
+          .getByTestId('use-case-grid')
+          .getByRole('link', { name: /Can GLP-1 Drugs Really Help Us Live Longer/ })
+      ).toBeVisible()
+      // The first pill starts where the grid's first card starts.
+      const stripX = await strip.evaluate((element) => element.getBoundingClientRect().x)
+      const gridX = await page
+        .getByTestId('use-case-grid')
+        .evaluate((element) => element.getBoundingClientRect().x)
+      expect(Math.abs(stripX - gridX)).toBeLessThanOrEqual(1)
+    } finally {
+      await browser.close()
+    }
+  }, 60000)
 
   test('gallery supports keyboard loading without IntersectionObserver', async () => {
     const browser = await chromium.launch()
