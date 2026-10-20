@@ -19,7 +19,9 @@ mock.module('next/navigation', () => ({
 }))
 
 const { Navbar } = await import('../../components/navbar')
-const { navActions, navItems } = await import('../../components/navbar/navbar-data')
+const { navActions, navItems, hiddenBenchmarkMenu } = await import(
+  '../../components/navbar/navbar-data'
+)
 
 describe('navbar', () => {
   test('marks the current child for accessibility without retaining a selected background', () => {
@@ -47,7 +49,12 @@ describe('navbar', () => {
       'Blog'
     ])
     expect(html).toContain('href="/open-science/use-cases"')
-    expect(html).toContain('href="/medskillaudit"')
+    expect(html).toContain('href="/benchmark/open-science"')
+    expect(html).not.toContain('href="/benchmark/medskillaudit"')
+    expect(hiddenBenchmarkMenu.children.map((child) => child.label)).toEqual([
+      'Open-Science',
+      'MedSkillAudit'
+    ])
     expect(html).not.toContain('Product')
     expect(html).not.toContain('Workflow benchmark suite')
     expect(html).not.toContain('Clinical research workflows')
@@ -137,7 +144,7 @@ describe('navbar', () => {
 
     const html = renderToStaticMarkup(<Navbar />)
 
-    expect(html).toContain('href="/medskillaudit"')
+    expect(html).toContain('href="/benchmark/open-science"')
     expect(html).toContain('href="/guides"')
     expect(html).not.toContain('href="/benchmark"')
   })
@@ -160,10 +167,10 @@ describe('navbar', () => {
   })
 
   test('marks Benchmark current as a standalone link on MedSkillAudit', () => {
-    mockPathname = '/medskillaudit'
+    mockPathname = '/benchmark/medskillaudit'
     const html = renderToStaticMarkup(<Navbar />)
     expect(html).toMatch(
-      /<a[^>]*aria-current="page"[^>]*href="\/medskillaudit"[^>]*>Benchmark<\/a>/
+      /<a[^>]*aria-current="page"[^>]*href="\/benchmark\/open-science"[^>]*>Benchmark<\/a>/
     )
     expect(html).not.toContain('Workflow benchmark suite')
   })

@@ -9,9 +9,9 @@ import { getAdjacentGuides, getAllGuides, getGuide } from '../../lib/guides'
 
 describe('published guides', () => {
   test('records the template update without replacing newer content dates', () => {
-    expect(guidePageLastModified('2026-09-01')).toBe('2026-10-09')
-    expect(guidePageLastModified('invalid')).toBe('2026-10-09')
-    expect(guidePageLastModified('2026-10-09T08:00:00Z')).toBe('2026-10-09T08:00:00.000Z')
+    expect(guidePageLastModified('2026-09-01')).toBe('2026-10-20')
+    expect(guidePageLastModified('invalid')).toBe('2026-10-20')
+    expect(guidePageLastModified('2026-10-21T08:00:00Z')).toBe('2026-10-21T08:00:00.000Z')
   })
 
   test('starts at the first active guide', async () => {

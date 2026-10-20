@@ -69,7 +69,7 @@ export const HomeAuditSection = () => (
         />
       </figure>
       <Link
-        href="/medskillaudit"
+        href="/benchmark/medskillaudit"
         className="mx-auto mt-[52px] flex h-12 w-fit items-center gap-2 bg-[#111] px-6 text-sm font-medium text-white transition-colors hover:bg-[#333]"
       >
         <span>Explore MedSkillAudit</span>

@@ -49,7 +49,7 @@ export const HomeEcosystemSection = ({ skillsCount }: { skillsCount: number }) =
           {
             title: 'MedSkillAudit',
             image: 'ecosystem-audit.png',
-            href: '/medskillaudit',
+            href: '/benchmark/medskillaudit',
             description: 'Audited release-ready before deployment.',
             detail:
               'Validate skills for safety, correctness, and reliability with automated and human-in-the-loop review.',

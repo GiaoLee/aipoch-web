@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 
 test.describe.configure({ timeout: 60000 })
 
-test('desktop navigation links directly to Use Cases and MedSkillAudit', async ({
+test('desktop navigation links directly to Use Cases and Open-Science Benchmarks', async ({
   page,
   isMobile
 }, testInfo) => {
@@ -35,19 +35,19 @@ test('desktop navigation links directly to Use Cases and MedSkillAudit', async (
   })
 
   const benchmarkLink = headerNav.getByRole('link', { name: 'Benchmark', exact: true })
-  await expect(benchmarkLink).toHaveAttribute('href', '/medskillaudit')
+  await expect(benchmarkLink).toHaveAttribute('href', '/benchmark/open-science')
   await benchmarkLink.hover()
   await expect(headerNav.locator('[data-desktop-nav-panel]')).not.toBeVisible()
   await Promise.all([
-    page.waitForURL(/\/medskillaudit$/, { timeout: 30000 }),
+    page.waitForURL(/\/benchmark\/open-science$/, { timeout: 30000 }),
     benchmarkLink.click()
   ])
   await expect(benchmarkLink).toHaveAttribute('aria-current', 'page')
-  await expect(page.getByRole('heading', { name: 'What is MedSkillAudit?' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'AIPOCH Open-Science Benchmarks' })).toBeVisible()
 })
 
 test('MedSkillAudit page presents framework content and assets', async ({ page }) => {
-  await page.goto('/medskillaudit')
+  await page.goto('/benchmark/medskillaudit')
 
   await expect(page.getByRole('heading', { name: 'What is MedSkillAudit?' })).toBeVisible()
   await expect(page.getByText('aipoch audit ./skills/my-skill').first()).toBeVisible()
@@ -106,7 +106,7 @@ test('MedSkillAudit page presents framework content and assets', async ({ page }
   await expect(page.getByText('Veto', { exact: true })).toHaveCount(0)
 })
 
-test('mobile navigation links directly to Use Cases and MedSkillAudit and closes the menu', async ({
+test('mobile navigation links directly to Use Cases and Open-Science Benchmarks and closes the menu', async ({
   page,
   isMobile
 }, testInfo) => {
@@ -134,18 +134,18 @@ test('mobile navigation links directly to Use Cases and MedSkillAudit and closes
     animations: 'disabled'
   })
   const benchmarkLink = mobileNav.getByRole('link', { name: 'Benchmark', exact: true })
-  await expect(benchmarkLink).toHaveAttribute('href', '/medskillaudit')
+  await expect(benchmarkLink).toHaveAttribute('href', '/benchmark/open-science')
   await Promise.all([
-    page.waitForURL(/\/medskillaudit$/, { timeout: 30000 }),
+    page.waitForURL(/\/benchmark\/open-science$/, { timeout: 30000 }),
     benchmarkLink.click()
   ])
   await expect(mobileNav).not.toBeVisible()
   await expect(page.getByRole('button', { name: 'Open menu' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'What is MedSkillAudit?' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'AIPOCH Open-Science Benchmarks' })).toBeVisible()
 })
 
 test('MedSkillAudit keeps footer legal regression intact', async ({ page }) => {
-  await page.goto('/medskillaudit')
+  await page.goto('/benchmark/medskillaudit')
 
   const footer = page.locator('footer')
   await expect(footer.getByRole('link', { name: 'Cookie Policy' })).toHaveAttribute(
@@ -165,6 +165,13 @@ test('MedSkillAudit keeps footer legal regression intact', async ({ page }) => {
 test('legacy benchmark URL redirects to MedSkillAudit', async ({ page }) => {
   await page.goto('/benchmark')
 
-  await expect(page).toHaveURL(/\/medskillaudit$/)
+  await expect(page).toHaveURL(/\/benchmark\/medskillaudit$/)
+  await expect(page.getByRole('heading', { name: 'What is MedSkillAudit?' })).toBeVisible()
+})
+
+test('old MedSkillAudit URL redirects to its Benchmark subpage', async ({ page }) => {
+  // Assert navigation and rendered content without waiting for the external demo video.
+  await page.goto('/medskillaudit', { waitUntil: 'domcontentloaded' })
+  await expect(page).toHaveURL(/\/benchmark\/medskillaudit$/)
   await expect(page.getByRole('heading', { name: 'What is MedSkillAudit?' })).toBeVisible()
 })

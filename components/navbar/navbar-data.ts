@@ -38,6 +38,27 @@ export type NavAction = {
 
 export const isExternalNavHref = (href: string) => /^https?:\/\//.test(href)
 
+// Keep the Benchmark submenu defined for future use, but do not render its dropdown.
+export const hiddenBenchmarkMenu: NavGroup = {
+  type: 'group',
+  label: 'Benchmark',
+  id: 'benchmark',
+  children: [
+    {
+      label: 'Open-Science',
+      href: '/benchmark/open-science',
+      description: 'Scientific research benchmark results',
+      icon: Trophy
+    },
+    {
+      label: 'MedSkillAudit',
+      href: '/benchmark/medskillaudit',
+      description: 'Audit medical research agent skills',
+      icon: BookOpen
+    }
+  ]
+}
+
 export const navItems: NavItem[] = [
   { type: 'link', label: 'Open-Science', href: '/open-science' },
   { type: 'link', label: 'Use Cases', href: '/open-science/use-cases' },
@@ -72,7 +93,7 @@ export const navItems: NavItem[] = [
       }
     ]
   },
-  { type: 'link', label: 'Benchmark', href: '/medskillaudit' },
+  { type: 'link', label: 'Benchmark', href: '/benchmark/open-science' },
   { type: 'link', label: 'Blog', href: '/blog' }
   // Community route code is retained, but the public entry is hidden while the page returns 404.
   // { type: 'link', label: 'Community', href: '/community' }
@@ -113,10 +134,12 @@ export const getActiveChildHref = (pathname: string | null, children: Pick<NavCh
 
 /** Prefer the dedicated entry over a parent route, such as Use Cases over Open-Science. */
 export const getActiveLinkHref = (pathname: string | null) =>
-  getActiveChildHref(
-    pathname,
-    navItems.filter((item) => item.type === 'link')
-  )
+  isGroupActive(pathname, hiddenBenchmarkMenu)
+    ? '/benchmark/open-science'
+    : getActiveChildHref(
+        pathname,
+        navItems.filter((item) => item.type === 'link')
+      )
 
 export const getActiveGroupIds = (pathname: string | null) => {
   return navItems
