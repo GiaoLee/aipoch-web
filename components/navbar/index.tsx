@@ -435,8 +435,8 @@ export function Navbar() {
                   : {})}
                 onClick={closeMobileMenu}
                 className={cn(
-                  'my-2 flex w-full items-center justify-between px-3 py-3 text-xs font-semibold uppercase tracking-[0.08em] transition-colors',
-                  action.emphasis ? 'rounded-none' : 'rounded-[8px]',
+                  'my-2 flex w-full items-center justify-between py-3 text-xs font-semibold uppercase tracking-[0.08em] transition-colors',
+                  action.emphasis ? 'rounded-none px-3' : 'rounded-[8px] px-0',
                   action.emphasis
                     ? isDark
                       ? 'bg-white text-black hover:bg-white/90'

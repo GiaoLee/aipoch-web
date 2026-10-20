@@ -81,12 +81,9 @@
 .science-benchmark .hero-backdrop img {
   position: absolute;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 1920px;
-  height: 966px;
-  max-width: none;
-  object-fit: cover;
+  left: 0;
+  width: 100%;
+  height: auto;
 }
 .science-benchmark .hero-backdrop > div {
   position: absolute;
@@ -137,7 +134,7 @@
   max-width: 1120px;
   padding: 18px 20px;
   border-left: 2px solid var(--bench-green);
-  background: #f6f6f4;
+  background: transparent;
   font-size: 13px;
   line-height: 22.75px;
   color: var(--bench-secondary);

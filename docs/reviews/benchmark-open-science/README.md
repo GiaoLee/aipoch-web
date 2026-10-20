@@ -14,7 +14,7 @@ Based on `origin/main` at `169eafe`, on branch `codex/benchmark-open-science`.
 
 Figma file: `6zS3GvT25svG6reU1oFKVi`. Boards: All `2823:173`, Local runs `2830:3776`, Public leaderboard `2830:7181`.
 
-The existing `/figma/audit/75fa7.png` exactly matches the supplied Figma hero asset (SHA-1 `7a7bb577e046390c8022bb1779cb72a031dd5754`). Its rendered crop is 1920 × 966, centered behind the hero. The three downloaded ring SVGs under `public/figma/benchmark/` retain their 84 × 84 geometry. All four assets loaded successfully in the browser. Navigation and footer reuse the existing shared components; their existing differences from the Figma board were left outside this page's scope.
+The existing `/figma/audit/75fa7.png` exactly matches the supplied Figma hero asset (SHA-1 `7a7bb577e046390c8022bb1779cb72a031dd5754`). Following the responsive review, it fills the viewport width and preserves its original 1672 × 941 proportions, matching MedSkillAudit's edge-aligned artwork. The three downloaded ring SVGs under `public/figma/benchmark/` retain their 84 × 84 geometry. All four assets loaded successfully in the browser. Navigation and footer reuse the existing shared components.
 
 ## Sitemap
 
@@ -66,3 +66,15 @@ Only `/benchmark/open-science` is affected by this follow-up. Its persistent `OP
 Added a `#f7f7f5` rectangular background and the existing light-gray border to all three query-type cards and all four guidance cards, including mobile layouts. Preserved typography, series colors, SVG assets, and zero corner radius. Renamed the ring wrapper to `benchmark-score-ring`: the previous `ring` class collided with Tailwind's ring utility and introduced a black box shadow around the SVG.
 
 Desktop (1440px) and mobile (390px) browser checks confirmed all seven card backgrounds/borders, zero corner radius, no ring box shadow, unchanged 84px assets, and no horizontal overflow. Desktop screenshots were visually inspected. TypeScript, focused Biome lint, 12 benchmark/sitemap unit tests, and diff whitespace checks passed. The affected URL and persistent modification date remain `/benchmark/open-science` and `2026-10-20`. No protected configuration changed.
+
+## Responsive navigation and hero follow-up — 20 October 2026
+
+Based on `origin/main` at `9b8f151` after PR #41 merged:
+
+- Remove the mobile Docs link's horizontal inset so its text aligns with the primary navigation links. Download retains its button padding.
+- Make the benchmark explanation panel transparent so its rectangular background no longer obscures the hero artwork.
+- Replace the fixed 1920px image width with viewport-width sizing and the original aspect ratio, matching the existing MedSkillAudit shell. Both image edges remain aligned with the page while the content retains its centered maximum width.
+
+Validation: TypeScript, focused Biome lint, 30 navbar/benchmark/sitemap unit tests, and diff whitespace checks passed. Browser checks at 320, 390, 768, 1440, 1920, 2560, and 2880px verified image edge alignment and proportions, transparent panel fill, no horizontal overflow, and mobile Docs/Blog text alignment. Shared mobile navigation was also verified on `/` and `/benchmark/medskillaudit` after full page load. Updated desktop, mobile, wide-screen, and mobile-menu screenshots are included.
+
+The hero affects `/benchmark/open-science`; shared mobile navigation affects the same common-layout URLs enumerated in `sitemap-impact.csv`. Their persistent page and shared-layout dates already equal the actual modification date, `2026-10-20`, so no timestamp change is needed. Sitemap tests continue to preserve newer authoritative dates, independent Wiki dates, and excluded routes. No API contracts or protected operational configuration changed.
