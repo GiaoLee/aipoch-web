@@ -2,7 +2,7 @@
 export function usesContentPageDesign(pathname: string): boolean {
   return (
     pathname === '/leaderboard' ||
-    pathname === '/medskillaudit' ||
+    pathname.startsWith('/benchmark/') ||
     /^\/leaderboard\/items\/[^/]+$/.test(pathname) ||
     /^\/guides\/[^/]+$/.test(pathname) ||
     /^\/agent-skills\/(?!list$)[^/]+$/.test(pathname)

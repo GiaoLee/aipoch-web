@@ -5,7 +5,7 @@ import { createPageMetadata } from '@/lib/page-metadata'
 import { staticImage } from '@/lib/staticAsset'
 import { validationStudy } from './benchmark-data'
 
-export const MEDSKILLAUDIT_PAGE_LAST_MODIFIED = '2026-10-08'
+export const MEDSKILLAUDIT_PAGE_LAST_MODIFIED = '2026-10-20'
 
 export const medSkillAuditSeo = {
   title: 'MedSkillAudit - Audit Framework for Medical Research Agent Skills · AIPOCH',
@@ -13,7 +13,7 @@ export const medSkillAuditSeo = {
     'Learn how MedSkillAudit evaluates medical research agent skills with veto gates, static design scoring, dynamic medical-task testing, and expert-aligned release dispositions.'
 } as const
 
-const pageUrl = `${SITE_DOMAIN}/medskillaudit`
+const pageUrl = `${SITE_DOMAIN}/benchmark/medskillaudit`
 const organizationId = `${SITE_DOMAIN}/#organization`
 const webpageId = `${pageUrl}#webpage`
 const softwareId = `${pageUrl}#software`

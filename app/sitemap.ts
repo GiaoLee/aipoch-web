@@ -1,7 +1,8 @@
 import type { MetadataRoute } from 'next'
+import { OPEN_SCIENCE_BENCHMARK_LAST_MODIFIED } from '@/app/(commonLayout)/benchmark/open-science/benchmark-metadata'
 import { HOMEPAGE_LAYOUT_LAST_MODIFIED } from '@/app/(commonLayout)/home/home-structured-data'
 import { MEDFLOW_PAGE_LAST_MODIFIED } from '@/app/(commonLayout)/medflow/medflow-metadata'
-import { MEDSKILLAUDIT_PAGE_LAST_MODIFIED } from '@/app/(commonLayout)/medskillaudit/medskillaudit-structured-data'
+import { MEDSKILLAUDIT_PAGE_LAST_MODIFIED } from '@/app/(commonLayout)/benchmark/medskillaudit/medskillaudit-structured-data'
 import { OPEN_SCIENCE_PAGE_LAST_MODIFIED } from '@/app/(commonLayout)/open-science/open-science-metadata'
 import { toSchemaDate } from '@/app/(commonLayout)/open-science/open-science-structured-data'
 import { agentSkillPageLastModified } from '@/lib/agent-skill-page-metadata'
@@ -137,7 +138,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8
     }),
     withReliableLastModified({
-      url: `${SITE_DOMAIN}/medskillaudit`,
+      url: `${SITE_DOMAIN}/benchmark/open-science`,
+      lastModified: OPEN_SCIENCE_BENCHMARK_LAST_MODIFIED,
+      changeFrequency: 'monthly',
+      priority: 0.8
+    }),
+    withReliableLastModified({
+      url: `${SITE_DOMAIN}/benchmark/medskillaudit`,
       lastModified: MEDSKILLAUDIT_PAGE_LAST_MODIFIED,
       changeFrequency: 'monthly',
       priority: 0.8

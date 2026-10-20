@@ -1,0 +1,1348 @@
+// Evaluation snapshot supplied with the benchmark article, compiled 19 October 2026.
+export type AgentGroup =
+  | 'aipoch'
+  | 'codex'
+  | 'claude'
+  | 'react'
+  | 'smol'
+  | 'asta'
+  | 'robo'
+  | 'other'
+export type RecordSource = 'val' | 'test' | 'local' | 'public'
+export type BenchmarkRecord = {
+  id: string
+  system: string
+  model: string
+  score: number
+  source: RecordSource
+  group: AgentGroup
+  date?: string
+}
+
+export const litqa: BenchmarkRecord[] = [
+  {
+    id: 'litqa-1',
+    system: 'AIPOCH Open-Science',
+    model: 'deepseek-v4-flash',
+    score: 100,
+    source: 'val',
+    group: 'aipoch'
+  },
+  {
+    id: 'litqa-2',
+    system: 'Asta Paper Finder',
+    model: 'openai/gpt-4o-mini',
+    score: 90.6667,
+    source: 'test',
+    group: 'asta'
+  },
+  {
+    id: 'litqa-3',
+    system: 'Asta v0',
+    model: 'mockllm/model',
+    score: 90.6667,
+    source: 'test',
+    group: 'asta'
+  },
+  {
+    id: 'litqa-4',
+    system: 'ReAct',
+    model: 'anthropic/claude-sonnet-4-6',
+    score: 86.6667,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'litqa-5',
+    system: 'ReAct',
+    model: 'anthropic/claude-opus-4-6',
+    score: 86.6667,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'litqa-6',
+    system: 'ReAct',
+    model: 'anthropic/claude-opus-4-7',
+    score: 85.3333,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'litqa-7',
+    system: 'ReAct',
+    model: 'openai/gpt-5.5-2026-04-23',
+    score: 85.3333,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'litqa-8',
+    system: 'ReAct',
+    model: 'openai/gpt-5-2025-08-07',
+    score: 82.6667,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'litqa-9',
+    system: 'ReAct',
+    model: 'openai/gpt-5.4-2026-03-05',
+    score: 80,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'litqa-10',
+    system: 'Asta Paper Finder',
+    model: 'openai/gpt-4o-mini',
+    score: 80,
+    source: 'val',
+    group: 'asta'
+  },
+  {
+    id: 'litqa-11',
+    system: 'ReAct',
+    model: 'google/gemini-3.1-pro-preview',
+    score: 77.3333,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'litqa-12',
+    system: 'ReAct',
+    model: 'openai/gpt-4o-2024-08-06',
+    score: 66.6667,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'litqa-13',
+    system: 'ReAct',
+    model: 'openai/gpt-4.1-2025-04-14',
+    score: 65.3333,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'litqa-14',
+    system: 'ReAct',
+    model: 'anthropic/claude-3-5-haiku-20241022',
+    score: 60,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'litqa-15',
+    system: 'ReAct',
+    model: 'google/gemini-2.5-flash-preview-05-20',
+    score: 57.3333,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'litqa-16',
+    system: 'ReAct',
+    model: 'openai/o3-2025-04-16',
+    score: 57.3333,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'litqa-17',
+    system: 'ReAct',
+    model: 'openai/gpt-5-mini-2025-08-07',
+    score: 56,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'litqa-18',
+    system: 'Smolagents Coder',
+    model: 'openai/gpt-5-2025-08-07',
+    score: 54.6667,
+    source: 'test',
+    group: 'smol'
+  },
+  {
+    id: 'litqa-19',
+    system: 'Smolagents Coder',
+    model: 'anthropic/claude-sonnet-4-20250514',
+    score: 52,
+    source: 'test',
+    group: 'smol'
+  },
+  {
+    id: 'litqa-20',
+    system: 'Smolagents Coder',
+    model: 'openai/gpt-4.1-2025-04-14',
+    score: 50.6667,
+    source: 'test',
+    group: 'smol'
+  },
+  {
+    id: 'litqa-21',
+    system: 'You.com Search API',
+    model: 'openai/gpt-4o-mini',
+    score: 50,
+    source: 'val',
+    group: 'other'
+  },
+  {
+    id: 'litqa-22',
+    system: 'Smolagents Coder',
+    model: 'openai/gpt-5-mini-2025-08-07',
+    score: 48,
+    source: 'test',
+    group: 'smol'
+  },
+  {
+    id: 'litqa-23',
+    system: 'ReAct',
+    model: 'anthropic/claude-sonnet-4-20250514',
+    score: 46.6667,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'litqa-24',
+    system: 'ReAct',
+    model: 'together/meta-llama/Llama-4-Scout-17B-16E-Instruct',
+    score: 37.3333,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'litqa-25',
+    system: 'You.com Search API',
+    model: 'openai/gpt-4o-mini',
+    score: 36,
+    source: 'test',
+    group: 'other'
+  },
+  {
+    id: 'litqa-26',
+    system: 'Smolagents Coder',
+    model: 'google/gemini-2.5-flash-preview-05-20',
+    score: 36,
+    source: 'test',
+    group: 'smol'
+  },
+  {
+    id: 'litqa-27',
+    system: 'Smolagents Coder',
+    model: 'openai/gpt-4o-2024-08-06',
+    score: 20,
+    source: 'test',
+    group: 'smol'
+  },
+  {
+    id: 'litqa-28',
+    system: 'ReAct',
+    model: 'anthropic/claude-3-5-haiku-20241022',
+    score: 10,
+    source: 'val',
+    group: 'react'
+  },
+  {
+    id: 'litqa-29',
+    system: 'Smolagents Coder',
+    model: 'together/meta-llama/Llama-4-Scout-17B-16E-Instruct',
+    score: 6.6667,
+    source: 'test',
+    group: 'smol'
+  },
+  {
+    id: 'litqa-30',
+    system: 'Smolagents Coder',
+    model: 'anthropic/claude-3-5-haiku-20241022',
+    score: 2.6667,
+    source: 'test',
+    group: 'smol'
+  }
+]
+
+export const pf: BenchmarkRecord[] = [
+  {
+    id: 'pf-1',
+    system: 'AIPOCH Open-Science',
+    model: 'deepseek-v4-flash',
+    score: 0.4554,
+    source: 'val',
+    group: 'aipoch',
+    date: '2026-10-09'
+  },
+  {
+    id: 'pf-2',
+    system: 'RoboPhD (2)',
+    model: 'gpt-5.4-2026-03-05 / gpt-5.4-mini-2026-03-17',
+    score: 0.4403,
+    source: 'test',
+    group: 'robo',
+    date: '2026-08-04'
+  },
+  {
+    id: 'pf-3',
+    system: 'Asta Paper Finder',
+    model: 'gpt-5-mini-2025-08-07 / gpt-4o-2024-08-06 / gemini-3-flash-preview',
+    score: 0.4327,
+    source: 'test',
+    group: 'asta',
+    date: '2026-03-17'
+  },
+  {
+    id: 'pf-4',
+    system: 'RoboPhD',
+    model: 'gpt-5.4-mini-2026-03-17 / claude-sonnet-4-6 / gpt-5.4-2026-03-05',
+    score: 0.4318,
+    source: 'test',
+    group: 'robo',
+    date: '2026-08-02'
+  },
+  {
+    id: 'pf-5',
+    system: 'Asta Paper Finder',
+    model: 'Gemini 2.0 Flash (unpinned) / gpt-4o-2024-08-06',
+    score: 0.3972,
+    source: 'test',
+    group: 'asta',
+    date: '2025-08-07'
+  },
+  {
+    id: 'pf-6',
+    system: 'RoboPhD (3)',
+    model: 'gpt-5.4-mini-2026-03-17 / gpt-5.4-2026-03-05',
+    score: 0.3895,
+    source: 'test',
+    group: 'robo',
+    date: '2026-08-09'
+  },
+  {
+    id: 'pf-7',
+    system: 'RoboPhD',
+    model:
+      'gpt-5.4-mini-2026-03-17 / claude-haiku-4-5-20251001 / gpt-5.4-2026-03-05 / claude-sonnet-4-6',
+    score: 0.3762,
+    source: 'test',
+    group: 'robo',
+    date: '2026-07-31'
+  },
+  {
+    id: 'pf-8',
+    system: 'Asta v0',
+    model:
+      'Claude Sonnet 4 (2025-05) / Gemini 2.0 Flash / o3 (2025-04) / o3 / GPT-4.1 (2025-04) / gpt-4o-2024-08-06 / GPT-4o',
+    score: 0.3757,
+    source: 'test',
+    group: 'asta',
+    date: '2025-08-13'
+  },
+  {
+    id: 'pf-9',
+    system: 'RoboPhD (2)',
+    model: 'gpt-5.4-mini-2026-03-17 / gpt-5.4-2026-03-05',
+    score: 0.3749,
+    source: 'test',
+    group: 'robo',
+    date: '2026-07-20'
+  },
+  {
+    id: 'pf-10',
+    system: 'ReAct',
+    model: 'claude-opus-4-7',
+    score: 0.374,
+    source: 'test',
+    group: 'react',
+    date: '2026-04-21'
+  },
+  {
+    id: 'pf-11',
+    system: 'ReAct',
+    model: 'claude-opus-4-6',
+    score: 0.3719,
+    source: 'test',
+    group: 'react',
+    date: '2026-04-21'
+  },
+  {
+    id: 'pf-12',
+    system: 'ReAct',
+    model: 'gpt-5.5-2026-04-23',
+    score: 0.3603,
+    source: 'test',
+    group: 'react',
+    date: '2026-04-27'
+  },
+  {
+    id: 'pf-13',
+    system: 'ReAct',
+    model: 'claude-sonnet-4-6',
+    score: 0.3565,
+    source: 'test',
+    group: 'react',
+    date: '2026-04-21'
+  },
+  {
+    id: 'pf-14',
+    system: 'ReAct',
+    model: 'gpt-5.4-2026-03-05',
+    score: 0.3015,
+    source: 'test',
+    group: 'react',
+    date: '2026-04-21'
+  },
+  {
+    id: 'pf-15',
+    system: 'ReAct',
+    model: 'gemini-3.1-pro-preview',
+    score: 0.2641,
+    source: 'test',
+    group: 'react',
+    date: '2026-04-21'
+  },
+  {
+    id: 'pf-16',
+    system: 'ReAct',
+    model: 'GPT-5 (2025-08)',
+    score: 0.2637,
+    source: 'test',
+    group: 'react',
+    date: '2025-08-11'
+  },
+  {
+    id: 'pf-17',
+    system: 'Smolagents Coder',
+    model: 'Claude Sonnet 4 (2025-05)',
+    score: 0.2213,
+    source: 'test',
+    group: 'smol',
+    date: '2025-08-08'
+  },
+  {
+    id: 'pf-18',
+    system: 'RoboPhD',
+    model: 'gpt-5.4-mini-2026-03-17',
+    score: 0.2205,
+    source: 'test',
+    group: 'robo',
+    date: '2026-07-27'
+  },
+  {
+    id: 'pf-19',
+    system: 'ReAct',
+    model: 'GPT-5 Mini (2025-08)',
+    score: 0.2204,
+    source: 'test',
+    group: 'react',
+    date: '2025-08-11'
+  },
+  {
+    id: 'pf-20',
+    system: 'ReAct',
+    model: 'Claude Sonnet 4 (2025-05)',
+    score: 0.2026,
+    source: 'test',
+    group: 'react',
+    date: '2025-08-08'
+  },
+  {
+    id: 'pf-21',
+    system: 'Smolagents Coder',
+    model: 'GPT-5 (2025-08)',
+    score: 0.2,
+    source: 'test',
+    group: 'smol',
+    date: '2025-08-14'
+  },
+  {
+    id: 'pf-22',
+    system: 'ReAct',
+    model: 'o3 (2025-04)',
+    score: 0.1928,
+    source: 'test',
+    group: 'react',
+    date: '2025-08-08'
+  },
+  {
+    id: 'pf-23',
+    system: 'Smolagents Coder',
+    model: 'GPT-5 Mini (2025-08)',
+    score: 0.1718,
+    source: 'test',
+    group: 'smol',
+    date: '2025-08-14'
+  },
+  {
+    id: 'pf-24',
+    system: 'Smolagents Coder',
+    model: 'GPT-4.1 (2025-04)',
+    score: 0.1653,
+    source: 'test',
+    group: 'smol',
+    date: '2025-08-08'
+  },
+  {
+    id: 'pf-25',
+    system: 'ReAct',
+    model: 'GPT-4.1 (2025-04)',
+    score: 0.1647,
+    source: 'test',
+    group: 'react',
+    date: '2025-08-08'
+  },
+  {
+    id: 'pf-26',
+    system: 'Smolagents Coder',
+    model: 'Gemini 2.5 Flash',
+    score: 0.1472,
+    source: 'test',
+    group: 'smol',
+    date: '2025-08-08'
+  },
+  {
+    id: 'pf-27',
+    system: 'ReAct',
+    model: 'GPT-4o (2024-08)',
+    score: 0.1293,
+    source: 'test',
+    group: 'react',
+    date: '2025-08-08'
+  },
+  {
+    id: 'pf-28',
+    system: 'Smolagents Coder',
+    model: 'GPT-4o (2024-08)',
+    score: 0.125,
+    source: 'test',
+    group: 'smol',
+    date: '2025-08-08'
+  },
+  {
+    id: 'pf-29',
+    system: 'ReAct',
+    model: 'Claude 3.5 Haiku (2024-10)',
+    score: 0.107,
+    source: 'test',
+    group: 'react',
+    date: '2025-08-08'
+  },
+  {
+    id: 'pf-30',
+    system: 'You.com Search API',
+    model: 'not disclosed',
+    score: 0.072,
+    source: 'test',
+    group: 'other',
+    date: '2025-08-07'
+  },
+  {
+    id: 'pf-31',
+    system: 'Smolagents Coder',
+    model: 'Llama 4 Scout 17B (unpinned)',
+    score: 0.0702,
+    source: 'test',
+    group: 'smol',
+    date: '2025-08-08'
+  },
+  {
+    id: 'pf-32',
+    system: 'ReAct',
+    model: 'Gemini 2.5 Flash',
+    score: 0.065,
+    source: 'test',
+    group: 'react',
+    date: '2025-08-08'
+  },
+  {
+    id: 'pf-33',
+    system: 'ReAct',
+    model: 'Llama 4 Scout 17B (unpinned)',
+    score: 0.0541,
+    source: 'test',
+    group: 'react',
+    date: '2025-08-08'
+  },
+  {
+    id: 'pf-34',
+    system: 'Smolagents Coder',
+    model: 'Claude 3.5 Haiku (2024-10)',
+    score: 0.0464,
+    source: 'test',
+    group: 'smol',
+    date: '2025-08-08'
+  }
+]
+
+export const b1: BenchmarkRecord[] = [
+  {
+    id: 'b1-1',
+    system: 'AIPOCH Open-Science',
+    model: 'GPT-6 Astra',
+    score: 79.35,
+    source: 'local',
+    group: 'aipoch'
+  },
+  {
+    id: 'b1-2',
+    system: 'Codex',
+    model: 'GPT-6 Astra',
+    score: 74.78,
+    source: 'local',
+    group: 'codex'
+  },
+  {
+    id: 'b1-3',
+    system: 'Claude Code',
+    model: 'Claude Opus 5',
+    score: 72.29,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b1-4',
+    system: 'Codex',
+    model: 'GPT-5.6 Sol (record 1)',
+    score: 71.78,
+    source: 'public',
+    group: 'codex'
+  },
+  {
+    id: 'b1-5',
+    system: 'AIPOCH Open-Science',
+    model: 'DeepSeek v4-flash',
+    score: 69.64,
+    source: 'local',
+    group: 'aipoch'
+  },
+  {
+    id: 'b1-6',
+    system: 'Claude Code',
+    model: 'GLM-5.3',
+    score: 63.05,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b1-7',
+    system: 'Codex',
+    model: 'GPT-5.6 Sol (record 2)',
+    score: 62.75,
+    source: 'public',
+    group: 'codex'
+  },
+  {
+    id: 'b1-8',
+    system: 'Claude Code',
+    model: 'Gemini 3.8 Flash',
+    score: 61.33,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b1-9',
+    system: 'Claude Code',
+    model: 'Qwen3.8-Max',
+    score: 59.14,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b1-10',
+    system: 'Codex',
+    model: 'GPT-5.5',
+    score: 57.57,
+    source: 'public',
+    group: 'codex'
+  },
+  {
+    id: 'b1-11',
+    system: 'Kimi Code',
+    model: 'Kimi K3',
+    score: 56.16,
+    source: 'public',
+    group: 'other'
+  },
+  {
+    id: 'b1-12',
+    system: 'Claude Code',
+    model: 'Kimi K3',
+    score: 55.79,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b1-13',
+    system: 'Claude Code',
+    model: 'GLM-5.2',
+    score: 54.01,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b1-14',
+    system: 'Claude Code',
+    model: 'Claude Opus 4.8',
+    score: 52.48,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b1-15',
+    system: 'Claude Code',
+    model: 'DeepSeek V4 Flash 0731',
+    score: 51.85,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b1-16',
+    system: 'OpenHands',
+    model: 'DeepSeek V4 Flash 0731',
+    score: 50.6,
+    source: 'public',
+    group: 'other'
+  },
+  {
+    id: 'b1-17',
+    system: 'Claude Code',
+    model: 'GLM-5.3-Flash',
+    score: 49.27,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b1-18',
+    system: 'Claude Code',
+    model: 'Kimi K2.7',
+    score: 44.43,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b1-19',
+    system: 'Claude Code',
+    model: 'MiniMax M3',
+    score: 43.53,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b1-20',
+    system: 'Claude Code',
+    model: 'DeepSeek V4 Pro',
+    score: 42.97,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b1-21',
+    system: 'Claude Code',
+    model: 'MiMo V2.5 Pro',
+    score: 41.7,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b1-22',
+    system: 'OpenHands',
+    model: 'DeepSeek V4 Pro',
+    score: 37.78,
+    source: 'public',
+    group: 'other'
+  },
+  {
+    id: 'b1-23',
+    system: 'Kimi Code',
+    model: 'Kimi K2.7',
+    score: 29.99,
+    source: 'public',
+    group: 'other'
+  },
+  {
+    id: 'b1-24',
+    system: 'MiMo Code',
+    model: 'MiMo V2.5 Pro',
+    score: 27.73,
+    source: 'public',
+    group: 'other'
+  }
+]
+
+export const b2: BenchmarkRecord[] = [
+  {
+    id: 'b2-1',
+    system: 'AIPOCH Open-Science',
+    model: 'GPT-6 Astra',
+    score: 56.11,
+    source: 'local',
+    group: 'aipoch'
+  },
+  {
+    id: 'b2-2',
+    system: 'Codex',
+    model: 'GPT-6 Astra',
+    score: 56.09,
+    source: 'local',
+    group: 'codex'
+  },
+  {
+    id: 'b2-3',
+    system: 'Codex',
+    model: 'GPT-5.6 Sol (record 1)',
+    score: 49.57,
+    source: 'public',
+    group: 'codex'
+  },
+  {
+    id: 'b2-4',
+    system: 'Claude Code',
+    model: 'Claude Opus 5',
+    score: 45.8,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b2-5',
+    system: 'Codex',
+    model: 'GPT-5.6 Sol (record 2)',
+    score: 42.96,
+    source: 'public',
+    group: 'codex'
+  },
+  {
+    id: 'b2-6',
+    system: 'Claude Code',
+    model: 'Gemini 3.8 Flash',
+    score: 39.13,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b2-7',
+    system: 'Claude Code',
+    model: 'Claude Opus 4.8',
+    score: 36.25,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b2-8',
+    system: 'Claude Code',
+    model: 'GLM-5.3',
+    score: 35.45,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b2-9',
+    system: 'Codex',
+    model: 'GPT-5.5',
+    score: 35.28,
+    source: 'public',
+    group: 'codex'
+  },
+  {
+    id: 'b2-10',
+    system: 'Claude Code',
+    model: 'Kimi K3',
+    score: 35.24,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b2-11',
+    system: 'Kimi Code',
+    model: 'Kimi K3',
+    score: 34.05,
+    source: 'public',
+    group: 'other'
+  },
+  {
+    id: 'b2-12',
+    system: 'Claude Code',
+    model: 'Qwen3.8-Max',
+    score: 32.51,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b2-13',
+    system: 'Claude Code',
+    model: 'GLM-5.2',
+    score: 30.81,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b2-14',
+    system: 'Claude Code',
+    model: 'GLM-5.3-Flash',
+    score: 28.66,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b2-15',
+    system: 'Claude Code',
+    model: 'DeepSeek V4 Flash 0731',
+    score: 26.49,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b2-16',
+    system: 'OpenHands',
+    model: 'DeepSeek V4 Flash 0731',
+    score: 24.89,
+    source: 'public',
+    group: 'other'
+  },
+  {
+    id: 'b2-17',
+    system: 'Claude Code',
+    model: 'Kimi K2.7',
+    score: 23.84,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b2-18',
+    system: 'Claude Code',
+    model: 'MiniMax M3',
+    score: 20.86,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b2-19',
+    system: 'Claude Code',
+    model: 'DeepSeek V4 Pro',
+    score: 18.79,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b2-20',
+    system: 'Claude Code',
+    model: 'MiMo V2.5 Pro',
+    score: 18.49,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b2-21',
+    system: 'Kimi Code',
+    model: 'Kimi K2.7',
+    score: 17.01,
+    source: 'public',
+    group: 'other'
+  },
+  {
+    id: 'b2-22',
+    system: 'OpenHands',
+    model: 'DeepSeek V4 Pro',
+    score: 16.66,
+    source: 'public',
+    group: 'other'
+  },
+  {
+    id: 'b2-23',
+    system: 'MiMo Code',
+    model: 'MiMo V2.5 Pro',
+    score: 11.33,
+    source: 'public',
+    group: 'other'
+  }
+]
+
+export const b3: BenchmarkRecord[] = [
+  {
+    id: 'b3-1',
+    system: 'AIPOCH Open-Science',
+    model: 'GPT-6 Astra',
+    score: 59.67,
+    source: 'local',
+    group: 'aipoch'
+  },
+  {
+    id: 'b3-2',
+    system: 'Codex',
+    model: 'GPT-6 Astra',
+    score: 58.12,
+    source: 'local',
+    group: 'codex'
+  },
+  {
+    id: 'b3-3',
+    system: 'Codex',
+    model: 'GPT-5.6 Sol (record 1)',
+    score: 51.6,
+    source: 'public',
+    group: 'codex'
+  },
+  {
+    id: 'b3-4',
+    system: 'Codex',
+    model: 'GPT-5.6 Sol (record 2)',
+    score: 40.86,
+    source: 'public',
+    group: 'codex'
+  },
+  {
+    id: 'b3-5',
+    system: 'Claude Code',
+    model: 'Claude Opus 5',
+    score: 40.7,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b3-6',
+    system: 'Claude Code',
+    model: 'Gemini 3.8 Flash',
+    score: 37.79,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b3-7',
+    system: 'Claude Code',
+    model: 'GLM-5.3',
+    score: 33.09,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b3-8',
+    system: 'Claude Code',
+    model: 'Claude Opus 4.8',
+    score: 31.73,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b3-9',
+    system: 'Claude Code',
+    model: 'GLM-5.3-Flash',
+    score: 30.7,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b3-10',
+    system: 'Claude Code',
+    model: 'GLM-5.2',
+    score: 30.29,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b3-11',
+    system: 'Claude Code',
+    model: 'Qwen3.8-Max',
+    score: 29.37,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b3-12',
+    system: 'Codex',
+    model: 'GPT-5.5',
+    score: 29.29,
+    source: 'public',
+    group: 'codex'
+  },
+  {
+    id: 'b3-13',
+    system: 'Kimi Code',
+    model: 'Kimi K3',
+    score: 28.15,
+    source: 'public',
+    group: 'other'
+  },
+  {
+    id: 'b3-14',
+    system: 'Claude Code',
+    model: 'Kimi K3',
+    score: 27.78,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b3-15',
+    system: 'Claude Code',
+    model: 'DeepSeek V4 Flash',
+    score: 24.84,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b3-16',
+    system: 'OpenHands',
+    model: 'DeepSeek V4 Flash',
+    score: 21.91,
+    source: 'public',
+    group: 'other'
+  },
+  {
+    id: 'b3-17',
+    system: 'Claude Code',
+    model: 'MiniMax M3',
+    score: 20.61,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b3-18',
+    system: 'Claude Code',
+    model: 'Kimi K2.7',
+    score: 19.75,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b3-19',
+    system: 'Claude Code',
+    model: 'DeepSeek V4 Pro',
+    score: 19.2,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b3-20',
+    system: 'Claude Code',
+    model: 'MiMo V2.5 Pro',
+    score: 16.49,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b3-21',
+    system: 'OpenHands',
+    model: 'DeepSeek V4 Pro',
+    score: 15.78,
+    source: 'public',
+    group: 'other'
+  },
+  {
+    id: 'b3-22',
+    system: 'Kimi Code',
+    model: 'Kimi K2.7',
+    score: 15.65,
+    source: 'public',
+    group: 'other'
+  },
+  {
+    id: 'b3-23',
+    system: 'MiMo Code',
+    model: 'MiMo V2.5 Pro',
+    score: 11.5,
+    source: 'public',
+    group: 'other'
+  }
+]
+
+export const b4: BenchmarkRecord[] = [
+  {
+    id: 'b4-1',
+    system: 'AIPOCH Open-Science',
+    model: 'GPT-6 Astra',
+    score: 59.46,
+    source: 'local',
+    group: 'aipoch'
+  },
+  {
+    id: 'b4-2',
+    system: 'Codex',
+    model: 'GPT-6 Astra',
+    score: 55.45,
+    source: 'local',
+    group: 'codex'
+  },
+  {
+    id: 'b4-3',
+    system: 'Codex',
+    model: 'GPT-5.6 Sol (record 1)',
+    score: 50.41,
+    source: 'public',
+    group: 'codex'
+  },
+  {
+    id: 'b4-4',
+    system: 'Claude Code',
+    model: 'Claude Opus 5',
+    score: 42.39,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b4-5',
+    system: 'Codex',
+    model: 'GPT-5.6 Sol (record 2)',
+    score: 40.74,
+    source: 'public',
+    group: 'codex'
+  },
+  {
+    id: 'b4-6',
+    system: 'Claude Code',
+    model: 'GLM-5.3',
+    score: 35.01,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b4-7',
+    system: 'Claude Code',
+    model: 'Gemini 3.8 Flash',
+    score: 34.52,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b4-8',
+    system: 'Claude Code',
+    model: 'Qwen3.8-Max',
+    score: 34.46,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b4-9',
+    system: 'Codex',
+    model: 'GPT-5.5',
+    score: 30.46,
+    source: 'public',
+    group: 'codex'
+  },
+  {
+    id: 'b4-10',
+    system: 'Claude Code',
+    model: 'Claude Opus 4.8',
+    score: 29.59,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b4-11',
+    system: 'Claude Code',
+    model: 'Kimi K3',
+    score: 29.57,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b4-12',
+    system: 'Claude Code',
+    model: 'GLM-5.2',
+    score: 27.27,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b4-13',
+    system: 'Kimi Code',
+    model: 'Kimi K3',
+    score: 26.53,
+    source: 'public',
+    group: 'other'
+  },
+  {
+    id: 'b4-14',
+    system: 'Claude Code',
+    model: 'GLM-5.3-Flash',
+    score: 25.43,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b4-15',
+    system: 'OpenHands',
+    model: 'DeepSeek V4 Flash',
+    score: 24.99,
+    source: 'public',
+    group: 'other'
+  },
+  {
+    id: 'b4-16',
+    system: 'Claude Code',
+    model: 'DeepSeek V4 Flash',
+    score: 24.41,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b4-17',
+    system: 'Claude Code',
+    model: 'Kimi K2.7',
+    score: 21.34,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b4-18',
+    system: 'Claude Code',
+    model: 'MiniMax M3',
+    score: 21.21,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b4-19',
+    system: 'Claude Code',
+    model: 'DeepSeek V4 Pro',
+    score: 18.94,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b4-20',
+    system: 'Claude Code',
+    model: 'MiMo V2.5 Pro',
+    score: 16.33,
+    source: 'public',
+    group: 'claude'
+  },
+  {
+    id: 'b4-21',
+    system: 'OpenHands',
+    model: 'DeepSeek V4 Pro',
+    score: 16.28,
+    source: 'public',
+    group: 'other'
+  },
+  {
+    id: 'b4-22',
+    system: 'Kimi Code',
+    model: 'Kimi K2.7',
+    score: 16.22,
+    source: 'public',
+    group: 'other'
+  },
+  {
+    id: 'b4-23',
+    system: 'MiMo Code',
+    model: 'MiMo V2.5 Pro',
+    score: 14.11,
+    source: 'public',
+    group: 'other'
+  }
+]
+
+export type SourceFilter = 'all' | RecordSource
+/** Reference records remain visible so changing sources keeps the comparison meaningful. */
+export function filterRecords(records: BenchmarkRecord[], source: SourceFilter) {
+  return records.filter(
+    (record) => source === 'all' || record.source === source || record.group === 'aipoch'
+  )
+}
+export function matchDistractorRecords() {
+  return b4.flatMap((record) => {
+    const previous = b3.find(
+      (other) => other.system === record.system && other.model === record.model
+    )
+    return previous
+      ? [{ ...record, previousScore: previous.score, delta: record.score - previous.score }]
+      : []
+  })
+}

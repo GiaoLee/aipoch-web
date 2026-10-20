@@ -491,7 +491,9 @@ describe('mock development end to end', () => {
       ['/leaderboard/daily', 'Literature Review'],
       ['/leaderboard/items/literature-review-result', 'literature-review'],
       ['/compare/literature-review-vs-clinical-trials', 'Literature Review'],
-      ['/open-science/download', '1.0.0-mock']
+      ['/open-science/download', '1.0.0-mock'],
+      ['/benchmark/open-science', 'AIPOCH Open-Science Benchmarks'],
+      ['/benchmark/medskillaudit', 'MedSkillAudit']
     ]) {
       const response = await fetch(`${web}${path}`)
       expect(response.status).toBe(200)
@@ -502,7 +504,7 @@ describe('mock development end to end', () => {
           ...html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>(.*?)<\/script>/g)
         ].flatMap((match) => JSON.parse(match[1]))
         expect(schemas.find((schema) => schema['@type'] === 'WebPage')).toMatchObject({
-          dateModified: '2026-10-09'
+          dateModified: '2026-10-20'
         })
         expect(schemas.find((schema) => schema['@type'] === 'SoftwareApplication')).toMatchObject({
           dateModified: '2026-09-01T00:00:00.000Z',
@@ -514,19 +516,22 @@ describe('mock development end to end', () => {
     const sitemap = await (await fetch(`${web}/sitemap.xml`)).text()
     expect(sitemap).toContain('/agent-skills/literature-review</loc>')
     for (const [path, date] of [
-      ['', '2026-10-12'],
-      ['/agent-skills/list', '2026-10-09'],
-      ['/agent-skills/literature-review', '2026-10-09'],
-      ['/blog', '2026-10-09'],
-      ['/blog/release-notes', '2026-10-09']
+      ['', '2026-10-20'],
+      ['/agent-skills/list', '2026-10-20'],
+      ['/agent-skills/literature-review', '2026-10-20'],
+      ['/blog', '2026-10-20'],
+      ['/blog/release-notes', '2026-10-20'],
+      ['/benchmark/open-science', '2026-10-20'],
+      ['/benchmark/medskillaudit', '2026-10-20']
     ]) {
       expect(sitemap).toContain(
         `<loc>https://aipoch.com${path}</loc>\n<lastmod>${date}T00:00:00.000Z</lastmod>`
       )
     }
     expect(sitemap).toContain(
-      '<loc>https://aipoch.com/open-science/download</loc>\n<lastmod>2026-10-09T00:00:00.000Z</lastmod>'
+      '<loc>https://aipoch.com/open-science/download</loc>\n<lastmod>2026-10-20T00:00:00.000Z</lastmod>'
     )
+    expect(sitemap).not.toContain('<loc>https://aipoch.com/medskillaudit</loc>')
     expect(sitemap).not.toContain('/leaderboard')
     expect(sitemap).not.toContain('/claim/')
     expect(sitemap).not.toContain('/open-science/overview</loc>')
@@ -1404,7 +1409,7 @@ describe('mock development end to end', () => {
         const schemas = await page.locator('script[type="application/ld+json"]').allTextContents()
         const parsed = schemas.map((schema) => JSON.parse(schema))
         expect(parsed.find((schema) => schema['@type'] === 'WebPage').dateModified).toBe(
-          '2026-10-09'
+          '2026-10-20'
         )
         expect(
           parsed.find((schema) => schema['@type'] === 'SoftwareApplication').dateModified

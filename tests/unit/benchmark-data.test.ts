@@ -16,7 +16,7 @@ import {
   staticDimensions,
   vetoGroups,
   validationStudy
-} from '../../app/(commonLayout)/medskillaudit/benchmark-data'
+} from '../../app/(commonLayout)/benchmark/medskillaudit/benchmark-data'
 
 describe('benchmark content data', () => {
   test('keeps PRD-mandated benchmark metrics and links', () => {

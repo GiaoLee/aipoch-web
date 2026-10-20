@@ -21,16 +21,14 @@ const AUTHORS = [
 
 describe('MedSkillAudit metadata', () => {
   test('uses the MedSkillAudit route for canonical and sharing URLs', async () => {
-    const { metadata } = await import('../../app/(commonLayout)/medskillaudit/page')
+    const { metadata } = await import('../../app/(commonLayout)/benchmark/medskillaudit/page')
 
     const canonicalUrl = String(metadata.alternates?.canonical)
     const openGraphUrl = String(metadata.openGraph?.url)
 
     expect(metadata.title).toContain('MedSkillAudit')
-    expect(canonicalUrl).toEndWith('/medskillaudit')
-    expect(openGraphUrl).toEndWith('/medskillaudit')
-    expect(canonicalUrl).not.toContain('/benchmark')
-    expect(openGraphUrl).not.toContain('/benchmark')
+    expect(canonicalUrl).toEndWith('/benchmark/medskillaudit')
+    expect(openGraphUrl).toEndWith('/benchmark/medskillaudit')
     expect(metadata.openGraph?.images).toEqual([
       {
         url: MEDSKILLAUDIT_IMAGE,
@@ -44,7 +42,7 @@ describe('MedSkillAudit metadata', () => {
 
   test('links the page, software, and complete arXiv v1 citation in one JSON-LD graph', async () => {
     const { default: MedSkillAuditPage } = await import(
-      '../../app/(commonLayout)/medskillaudit/page'
+      '../../app/(commonLayout)/benchmark/medskillaudit/page'
     )
     const html = renderToStaticMarkup(MedSkillAuditPage())
     const content = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1]
@@ -68,12 +66,12 @@ describe('MedSkillAudit metadata', () => {
     const software = graph.find((entity) => entity['@type'] === 'SoftwareApplication')
     const article = graph.find((entity) => entity['@type'] === 'ScholarlyArticle')
     expect(webpage).toMatchObject({
-      '@id': 'https://aipoch.com/medskillaudit#webpage',
-      url: 'https://aipoch.com/medskillaudit',
-      mainEntity: { '@id': 'https://aipoch.com/medskillaudit#software' }
+      '@id': 'https://aipoch.com/benchmark/medskillaudit#webpage',
+      url: 'https://aipoch.com/benchmark/medskillaudit',
+      mainEntity: { '@id': 'https://aipoch.com/benchmark/medskillaudit#software' }
     })
     expect(software).toMatchObject({
-      '@id': 'https://aipoch.com/medskillaudit#software',
+      '@id': 'https://aipoch.com/benchmark/medskillaudit#software',
       name: 'MedSkillAudit',
       citation: { '@id': 'https://arxiv.org/abs/2604.20441' }
     })
