@@ -5,6 +5,18 @@
   --bench-muted: #6b6b66;
   --bench-green: #afd670;
   --bench-green-ink: #607a32;
+  --bench-green-bg: #eef5e1;
+  --bench-validation: #d7ebb5;
+  --bench-codex: #759eb8;
+  --bench-claude: #d08a62;
+  --bench-react: #d3b46a;
+  --bench-smol: #a99cc8;
+  --bench-asta: #b9a58a;
+  --bench-robo: #cf8fa9;
+  --bench-other: #c9c6bd;
+  --bench-hover: #f2f1ec;
+  --bench-success: #147047;
+  --bench-error: #b42318;
   background: #f7f7f5;
   color: var(--bench-text);
   font-size: 16px;
@@ -27,7 +39,7 @@
   text-decoration-color: #d8d5cc;
 }
 .science-benchmark a:hover {
-  text-decoration-color: #111;
+  text-decoration-color: #edb732;
 }
 .science-benchmark .col,
 .science-benchmark figure,
@@ -62,6 +74,7 @@
 .science-benchmark sup a {
   font-family: var(--font-mono), monospace;
   font-size: 11px;
+  color: #915600;
 }
 .science-benchmark code {
   font-family: var(--font-mono), monospace;
@@ -155,6 +168,7 @@
   font-weight: 500;
   box-shadow: none;
   text-decoration: none;
+  transition: background-color 150ms, border-color 150ms, color 150ms;
 }
 .science-benchmark .hero-button[data-variant="default"] {
   background: #111;
@@ -166,7 +180,8 @@
   color: #111;
 }
 .science-benchmark .hero-button:hover {
-  background: #e7e5de;
+  background: var(--bench-hover);
+  border-color: #d8d5cc;
   color: #111;
 }
 .science-benchmark .stats {
@@ -181,6 +196,10 @@
   padding: 24px 22px 22px;
   min-height: 173px;
   border-right: 1px solid var(--bench-line);
+  transition: background-color 200ms;
+}
+.science-benchmark .stat:hover {
+  background: var(--bench-hover);
 }
 .science-benchmark .stat:nth-child(3n) {
   border-right: 0;
@@ -190,8 +209,9 @@
 }
 .science-benchmark .stat .v {
   font:
-    48px / 1.15 Georgia,
+    48px / 1.15 'Times New Roman',
     serif;
+  font-variant-numeric: lining-nums tabular-nums;
   letter-spacing: -1.92px;
 }
 .science-benchmark .stat .n {
@@ -202,6 +222,7 @@
 }
 .science-benchmark .stat .d {
   margin-top: 8px;
+  color: var(--bench-green-ink);
   font:
     500 14px / 22px var(--font-mono),
     monospace;
@@ -273,7 +294,7 @@
 }
 .science-benchmark .legend .legend-reference {
   width: 6px;
-  border-left: 1.5px dashed #759eb8;
+  border-left: 1.5px dashed var(--bench-codex);
   border-radius: 0;
 }
 .science-benchmark .pair {
@@ -334,7 +355,7 @@
   background: #111;
 }
 .science-benchmark .chips button:hover:not([aria-pressed="true"]) {
-  background: #e7e5de;
+  background: var(--bench-hover);
 }
 .science-benchmark .axis,
 .science-benchmark .bar-row {
@@ -379,13 +400,18 @@
 }
 .science-benchmark .bar-row {
   min-height: 27px;
+  transition: background-color 120ms;
 }
 .science-benchmark .me {
-  background: #afd67014;
+  background: var(--bench-green-bg);
 }
 .science-benchmark .bar-row:hover,
-.science-benchmark .distractor-row:hover {
-  background: #f6f6f4;
+.science-benchmark .bar-row:focus-visible,
+.science-benchmark .distractor-row:hover,
+.science-benchmark .distractor-row:focus-visible,
+.science-benchmark .level-row:hover,
+.science-benchmark .level-row:focus-within {
+  background: var(--bench-hover);
 }
 .science-benchmark .lab {
   padding-left: 8px;
@@ -398,6 +424,18 @@
 }
 .science-benchmark .lab em {
   font-style: normal;
+  color: var(--bench-muted);
+}
+.science-benchmark .bar-row .lab {
+  min-width: 0;
+  white-space: normal;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  line-height: 16px;
+  padding-block: 3px;
+}
+.science-benchmark .bar-row .agent-name {
+  display: block;
 }
 .science-benchmark .me .lab {
   color: #111;
@@ -407,6 +445,9 @@
   color: var(--bench-secondary);
 }
 .science-benchmark .tg {
+  display: inline-block;
+  white-space: nowrap;
+  vertical-align: baseline;
   margin-left: 5px;
   border: 1px solid var(--bench-line);
   padding: 0 3px;
@@ -428,6 +469,7 @@
 .science-benchmark .bar {
   position: absolute;
   inset: 3px auto 3px 0;
+  transform-origin: left center;
 }
 .science-benchmark .me .bar {
   inset-block: 1px;
@@ -439,8 +481,12 @@
   color: var(--bench-secondary);
 }
 .science-benchmark .me .val {
-  color: var(--bench-green-ink);
+  color: var(--bench-text);
   font-weight: 700;
+}
+.science-benchmark .me .tg {
+  color: var(--bench-green-ink);
+  border-color: var(--bench-green);
 }
 .science-benchmark .types {
   display: grid;
@@ -497,7 +543,7 @@
   font:
     11px / 20px var(--font-mono),
     monospace;
-  color: var(--bench-muted);
+  color: var(--bench-green-ink);
 }
 .science-benchmark .step .t {
   font-size: 15px;
@@ -523,7 +569,7 @@
   height: 8px;
   top: 7px;
   left: 0;
-  background: #759eb8;
+  background: var(--bench-codex);
 }
 .science-benchmark .step .withheld {
   color: var(--bench-muted);
@@ -539,8 +585,9 @@
 }
 .science-benchmark .step .s {
   font:
-    36px / 1.2 Georgia,
+    36px / 1.2 'Times New Roman',
     serif;
+  font-variant-numeric: lining-nums tabular-nums;
   margin-top: 12px;
 }
 .science-benchmark .step small {
@@ -560,6 +607,7 @@
 }
 .science-benchmark .level-row {
   padding: 6px 0;
+  transition: background-color 300ms;
 }
 .science-benchmark .gl {
   font-size: 14px;
@@ -581,7 +629,7 @@
   position: absolute;
   height: 2px;
   top: 50%;
-  background: var(--bench-line);
+  background: #d8d5cc;
 }
 .science-benchmark .point,
 .science-benchmark .swarm-dot {
@@ -640,12 +688,13 @@
 .science-benchmark .reference-line {
   position: absolute;
   inset-block: 0;
-  border-left: 1.5px dashed #759eb8;
+  border-left: 1.5px dashed var(--bench-codex);
 }
 .science-benchmark .swarm-dot {
   width: 10px;
   height: 10px;
   border-width: 1.5px;
+  transition: transform 200ms;
 }
 .science-benchmark .swarm-dot.me {
   width: 15px;
@@ -656,7 +705,7 @@
 .science-benchmark .swarm-dot:hover,
 .science-benchmark .swarm-dot:focus-visible {
   z-index: 2;
-  transform: translate(-50%, -50%) scale(1.4);
+  transform: translate(-50%, -50%) scale(1.5);
 }
 .science-benchmark .distractor-row,
 .science-benchmark .distractor-axis {
@@ -693,10 +742,10 @@
   background: var(--bench-green);
 }
 .science-benchmark .val.negative {
-  color: #915600;
+  color: var(--bench-error);
 }
 .science-benchmark .val.positive {
-  color: var(--bench-green-ink);
+  color: var(--bench-success);
 }
 .science-benchmark .tbl-wrap {
   overflow-x: auto;
@@ -868,9 +917,6 @@
   .science-benchmark .val {
     font-size: 10px;
   }
-  .science-benchmark .tg {
-    display: none;
-  }
   .science-benchmark .level-row,
   .science-benchmark .level-axis {
     grid-template-columns: 36px minmax(0, 1fr) 48px;
@@ -914,11 +960,29 @@
     transform: translate(-50%, -50%);
   }
 }
+.benchmark-tooltip {
+  animation-duration: 120ms;
+  box-shadow: 0 10px 30px rgb(17 17 17 / 18%);
+}
 @media (prefers-reduced-motion: reduce) {
   .science-benchmark *,
   .science-benchmark *::before,
   .science-benchmark *::after {
     transition: none;
+    animation: none;
     scroll-behavior: auto;
+  }
+  .benchmark-tooltip {
+    animation: none;
+  }
+}
+.science-benchmark [data-benchmark-reveal="pending"] {
+  opacity: 0;
+  pointer-events: none;
+}
+@media print, (prefers-reduced-motion: reduce) {
+  .science-benchmark [data-benchmark-reveal="pending"] {
+    opacity: 1;
+    pointer-events: auto;
   }
 }

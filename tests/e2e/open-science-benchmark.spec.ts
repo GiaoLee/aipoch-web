@@ -7,7 +7,7 @@ test.beforeEach(async ({ page }) => {
   if (await reject.isVisible()) await reject.click()
 })
 
-test('renders the complete article, metadata, and local Figma assets', async ({
+test('renders the complete article, metadata, hero artwork, and score rings', async ({
   page
 }, testInfo) => {
   await expect(page.getByRole('heading', { name: 'AIPOCH Open-Science Benchmarks' })).toBeVisible()
@@ -27,6 +27,7 @@ test('renders the complete article, metadata, and local Figma assets', async ({
       )
       .toBe(true)
   }
+  await expect(page.locator('.benchmark-score-ring svg')).toHaveCount(3)
   await page.screenshot({ path: testInfo.outputPath('benchmark-all.png'), fullPage: true })
   await page.getByRole('link', { name: 'Evaluation details', exact: true }).click()
   await expect(page).toHaveURL(/#method$/)
@@ -95,5 +96,72 @@ test('server renders the benchmark content without JavaScript', async ({ browser
   await expect(page.getByRole('heading', { name: 'AIPOCH Open-Science Benchmarks' })).toBeVisible()
   await expect(page.locator('#ch-b1 .bar-row')).toHaveCount(24)
   await expect(page.locator('#ch-pf .bar-row').first()).toContainText('0.4554')
+  await expect(page.locator('figure').last()).toHaveCSS('opacity', '1')
+  await expect(page.locator('.ring-progress').first()).toHaveAttribute(
+    'stroke-dashoffset',
+    '0.6692'
+  )
   await context.close()
+})
+
+test('reveals upcoming charts once and draws their bars on entry', async ({ page }) => {
+  const figure = page.locator('figure').filter({ has: page.locator('#ch-litqa') })
+  await expect(figure).toHaveAttribute('data-benchmark-reveal', 'pending')
+  await figure.scrollIntoViewIfNeeded()
+  await expect(figure).toHaveAttribute('data-benchmark-reveal', 'shown')
+  expect(
+    await figure
+      .locator('.bar')
+      .first()
+      .evaluate((bar) =>
+        bar
+          .getAnimations()
+          .some((animation) =>
+            (animation.effect as KeyframeEffect)
+              .getKeyframes()
+              .some((frame) => frame.transform === 'scaleX(0)')
+          )
+      )
+  ).toBe(true)
+  await expect
+    .poll(() => figure.evaluate((node) => node.getAnimations({ subtree: true }).length))
+    .toBe(0)
+  await page.locator('h1').scrollIntoViewIfNeeded()
+  await figure.scrollIntoViewIfNeeded()
+  // Hover transitions may run under a stationary pointer after scrolling; only entrance animations must stay finished.
+  expect(
+    await figure.evaluate(
+      (node) =>
+        node
+          .getAnimations({ subtree: true })
+          .filter((animation) => !(animation instanceof CSSTransition)).length
+    )
+  ).toBe(0)
+})
+
+test('uses the v7 palette and gray hover fills', async ({ page, isMobile }) => {
+  await expect(
+    page.locator('#ch-b1 .legend span').filter({ hasText: 'Claude Code' }).locator('i')
+  ).toHaveCSS('background-color', 'rgb(208, 138, 98)')
+  await expect(
+    page.locator('#ch-pf .legend span').filter({ hasText: 'RoboPhD' }).locator('i')
+  ).toHaveCSS('background-color', 'rgb(207, 143, 169)')
+  if (!isMobile) {
+    for (const selector of ['.stat', '#ch-litqa .bar-row', '.level-row', '.distractor-row']) {
+      const target = page.locator(selector).first()
+      await target.hover()
+      await expect(target).toHaveCSS('background-color', 'rgb(242, 241, 236)')
+    }
+  }
+})
+
+test('reduced motion keeps every section and chart immediately readable', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await expect(page.locator('[data-benchmark-reveal="pending"]')).toHaveCount(0)
+  await page.reload()
+  await expect(page.locator('figure').last()).toHaveCSS('opacity', '1')
+  const chart = page.locator('#ch-b4')
+  await chart.scrollIntoViewIfNeeded()
+  expect(await chart.evaluate((node) => node.getAnimations({ subtree: true }).length)).toBe(0)
+  await expect(chart.locator('.bar-row')).toHaveCount(23)
 })

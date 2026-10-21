@@ -8,13 +8,13 @@ Based on `origin/main` at `169eafe`, on branch `codex/benchmark-open-science`.
 - MedSkillAudit moved to `/benchmark/medskillaudit`. Its content and assets are unchanged. Homepage links, canonical metadata, structured data, and sitemap use the new URL.
 - `/medskillaudit` permanently redirects to the new route. The pre-existing `/benchmark` redirect still reaches MedSkillAudit through that compatibility route; `next.config.ts` is unchanged.
 - The new page implements Figma's All board and independent chart source states. It includes 14 figures, all supplied records, source filters that retain AIPOCH references, keyboard/pointer/touch details, responsive plots and tables, and server-rendered content.
-- Benchmark records and article copy come from the supplied HTML snapshot, compiled 19 October 2026. Layout, typography, color, hero copy, background, and chart presentation follow the final Figma design. No benchmark API was invented or added.
+- Benchmark records and article copy come from the supplied HTML snapshot, compiled 19 October 2026. Layout, typography, hero copy, and background follow the final Figma design. The v7 follow-up below updates chart colors and motion from the newer supplied HTML. No benchmark API was invented or added.
 
 ## Design and assets
 
 Figma file: `6zS3GvT25svG6reU1oFKVi`. Boards: All `2823:173`, Local runs `2830:3776`, Public leaderboard `2830:7181`.
 
-The existing `/figma/audit/75fa7.png` exactly matches the supplied Figma hero asset (SHA-1 `7a7bb577e046390c8022bb1779cb72a031dd5754`). Following the responsive review, it fills the viewport width and preserves its original 1672 × 941 proportions, matching MedSkillAudit's edge-aligned artwork. The three downloaded ring SVGs under `public/figma/benchmark/` retain their 84 × 84 geometry. All four assets loaded successfully in the browser. Navigation and footer reuse the existing shared components.
+The existing `/figma/audit/75fa7.png` exactly matches the supplied Figma hero asset (SHA-1 `7a7bb577e046390c8022bb1779cb72a031dd5754`). Following the responsive review, it fills the viewport width and preserves its original 1672 × 941 proportions, matching MedSkillAudit's edge-aligned artwork. The v7 follow-up renders score-driven inline SVG rings with the same 84 × 84 geometry so their strokes can animate; the original downloaded SVG files remain unchanged. Navigation and footer reuse the existing shared components.
 
 ## Sitemap
 
@@ -75,6 +75,37 @@ Based on `origin/main` at `9b8f151` after PR #41 merged:
 - Make the benchmark explanation panel transparent so its rectangular background no longer obscures the hero artwork.
 - Replace the fixed 1920px image width with viewport-width sizing and the original aspect ratio, matching the existing MedSkillAudit shell. Both image edges remain aligned with the page while the content retains its centered maximum width.
 
-Validation: TypeScript, focused Biome lint, 30 navbar/benchmark/sitemap unit tests, and diff whitespace checks passed. Browser checks at 320, 390, 768, 1440, 1920, 2560, and 2880px verified image edge alignment and proportions, transparent panel fill, no horizontal overflow, and mobile Docs/Blog text alignment. Shared mobile navigation was also verified on `/` and `/benchmark/medskillaudit` after full page load. Updated desktop, mobile, wide-screen, and mobile-menu screenshots are included.
+Validation: TypeScript, focused Biome lint, 30 navbar/benchmark/sitemap unit tests, and diff whitespace checks passed. Browser checks at 320, 390, 768, 1440, 1920, 2560, and 2880px verified image edge alignment and proportions, transparent panel fill, no horizontal overflow, and mobile Docs/Blog text alignment. Shared mobile navigation was also verified on `/` and `/benchmark/medskillaudit` after full page load. Screenshots are omitted from this PR.
 
 The hero affects `/benchmark/open-science`; shared mobile navigation affects the same common-layout URLs enumerated in `sitemap-impact.csv`. Their persistent page and shared-layout dates already equal the actual modification date, `2026-10-20`, so no timestamp change is needed. Sitemap tests continue to preserve newer authoritative dates, independent Wiki dates, and excluded routes. No API contracts or protected operational configuration changed.
+
+## v7 palette and motion — 20 October 2026
+
+Applied the supplied `aipoch-benchmark-v7.html` chart palette: AIPOCH `#AFD670`, Codex `#759EB8`, Claude Code `#D08A62`, ReAct `#D3B46A`, Smolagents `#A99CC8`, Asta `#B9A58A`, RoboPhD `#CF8FA9`, and other agents `#C9C6BD`. Updated validation markers, score indicators, level labels, tooltips, and positive/negative deltas to the same reference. Preserved the approved layout, fonts, rectangular cards, chart grids, and dashed reference lines.
+
+All hover background fills use AIPOCH gray `#F2F1EC`, including the six summary cells, chart rows, source filters, and hero buttons. Swarm points enlarge on hover/focus. Upcoming article blocks reveal once while scrolling; bars grow, rings draw, and comparison marks fade in with the reference durations and stagger. Keyboard focus settles the containing block before interaction. Reduced-motion preferences disable motion, including when changed during the session, and server-rendered content remains visible without JavaScript.
+
+Validation:
+
+- `bun run typecheck` and focused Biome lint: passed.
+- Benchmark and sitemap unit tests: 12 passed.
+- `bun run test:e2e tests/e2e/open-science-benchmark.spec.ts --workers=2 --trace=on --reporter=line`: 16 passed across desktop and mobile. An earlier run had one mobile filter failure; three targeted repetitions and the final full run passed after settling entrance motion on focus.
+- Direct browser checks also verified ring animation, all changed series colors, gray hover fills, swarm enlargement, one-time reveals, reduced-motion cancellation, and no page errors.
+- `git diff --check`: passed.
+
+Only `https://aipoch.com/benchmark/open-science` changes in this follow-up. Its persistent `OPEN_SCIENCE_BENCHMARK_LAST_MODIFIED` remains `2026-10-20`, already the actual same-day modification date. Sitemap tests verify that date, preserve unrelated timestamps, and retain redirect exclusions. No API contracts, dependencies, protected operational configuration, or other pages changed. This follow-up was validated locally before inclusion in PR #42 at the user's request.
+
+## Numeric alignment and chart labels — 21 October 2026
+
+Georgia's installed font has no lining-numeral substitution and renders old-style digits with differing heights. Summary and guidance scores now use Times New Roman's lining numerals, preserving serif styling and existing sizes. Ranked bar labels put the system name on its own line and allow model text to wrap; source badges remain visible and unbroken at desktop and mobile widths. Label growth stays inside the original grid column, preserving aligned plot origins and the desktop two-chart layout.
+
+Validation: TypeScript, focused Biome lint, 12 benchmark/sitemap unit tests, and diff whitespace checks passed. Direct browser checks at 1920, 1440, 1024, 390, and 320px verified every source badge fits its label and stays before the plot, no horizontal page overflow, and side-by-side B1/B2 charts at desktop widths. Browser font measurements confirmed lining numeral heights, and chart rendering was visually inspected. No page errors occurred.
+
+Only `/benchmark/open-science` is affected. `OPEN_SCIENCE_BENCHMARK_LAST_MODIFIED` is now `2026-10-21`; metadata and sitemap tests verify the new date while unrelated dates remain unchanged. No protected operational configuration or API contracts changed. This follow-up is included in PR #42 at the user's request; no screenshots are included.
+
+
+## PR #42 final validation — 21 October 2026
+
+Consolidated the responsive, v7, and typography/label follow-ups into the existing PR. Removed screenshot changes from the final diff and screenshot embeds from the PR description. Final regression testing exposed an intermittent mobile filter click during entrance motion; pointer interaction now waits until the 600ms entrance completes, while keyboard focus can settle the animation immediately. The one-time reveal test excludes hover CSS transitions from its entrance-animation assertion. No validation configuration was changed.
+
+Final checks: TypeScript and focused Biome lint passed; 30 navbar/benchmark/sitemap unit tests and all 16 desktop/mobile benchmark browser cases passed.
