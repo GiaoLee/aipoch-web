@@ -1,5 +1,6 @@
 import { JsonLd } from '@/components/json-ld'
 import { BenchmarkHero } from './benchmark-hero'
+import { BenchmarkMotion } from './benchmark-motion'
 import {
   BarChart,
   QueryTypes,
@@ -15,7 +16,7 @@ export const metadata = benchmarkMetadata
 
 export default function OpenScienceBenchmarkPage() {
   return (
-    <main className="science-benchmark" id="top">
+    <BenchmarkMotion>
       <JsonLd data={benchmarkStructuredData()} />
       <article>
         <BenchmarkHero />
@@ -506,6 +507,6 @@ export default function OpenScienceBenchmarkPage() {
           </div>
         </div>
       </article>
-    </main>
+    </BenchmarkMotion>
   )
 }

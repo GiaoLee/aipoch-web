@@ -4,10 +4,13 @@ test.describe.configure({ timeout: 60000 })
 test.beforeEach(async ({ page }) => {
   await page.goto('/benchmark/open-science')
   const reject = page.getByRole('button', { name: 'Reject non-essential', exact: true })
-  if (await reject.isVisible()) await reject.click()
+  // Consent mounts after hydration. A synchronous visibility check can miss it,
+  // leaving the mobile banner over the chart when the test starts interacting.
+  await reject.click()
+  await expect(reject).not.toBeVisible()
 })
 
-test('renders the complete article, metadata, and local Figma assets', async ({
+test('renders the complete article, metadata, hero artwork, and score rings', async ({
   page
 }, testInfo) => {
   await expect(page.getByRole('heading', { name: 'AIPOCH Open-Science Benchmarks' })).toBeVisible()
@@ -27,6 +30,7 @@ test('renders the complete article, metadata, and local Figma assets', async ({
       )
       .toBe(true)
   }
+  await expect(page.locator('.benchmark-score-ring svg')).toHaveCount(3)
   await page.screenshot({ path: testInfo.outputPath('benchmark-all.png'), fullPage: true })
   await page.getByRole('link', { name: 'Evaluation details', exact: true }).click()
   await expect(page).toHaveURL(/#method$/)
@@ -78,14 +82,89 @@ test('details work with keyboard, pointer, and tap, and close with Escape', asyn
 })
 
 test('keeps responsive layouts inside the viewport and the submenu hidden', async ({ page }) => {
-  for (const width of [1440, 1024, 768, 390, 320]) {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await expect(page.locator('.notice')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+  for (const width of [2880, 1920, 1440, 1024, 981, 980, 768, 640, 390, 360, 320]) {
     await page.setViewportSize({ width, height: 900 })
     await expect
       .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth))
       .toBe(true)
+    const artwork = await page.locator('.hero-backdrop img').boundingBox()
+    if (!artwork) throw new Error('Hero artwork must have a rendered box')
+    expect(artwork.x).toBeCloseTo(0, 0)
+    expect(artwork.width).toBeCloseTo(width, 0)
+    expect(artwork.width / artwork.height).toBeCloseTo(1672 / 941, 2)
+    const layout = await page.evaluate(() => {
+      const bounds = (root: ParentNode, selector: string) => {
+        const element = root.querySelector(selector)
+        if (!element) throw new Error(`Missing layout element: ${selector}`)
+        return element.getBoundingClientRect()
+      }
+      const cards = [...document.querySelectorAll('.step')].map((card) => ({
+        top: card.getBoundingClientRect().top,
+        score: bounds(card, '.s').top
+      }))
+      const tagsFit = [...document.querySelectorAll('.bar-row .tg')].every((tag) => {
+        const box = tag.getBoundingClientRect()
+        const labelElement = tag.closest('.lab')
+        const row = tag.closest('.bar-row')
+        if (!labelElement || !row) return false
+        const label = labelElement.getBoundingClientRect()
+        const plot = bounds(row, '.track')
+        return (
+          getComputedStyle(tag).display !== 'none' &&
+          box.left >= label.left - 1 &&
+          box.right <= label.right + 1 &&
+          box.bottom <= label.bottom + 1 &&
+          box.right < plot.left
+        )
+      })
+      const b1 = bounds(document, '#ch-b1')
+      const b2 = bounds(document, '#ch-b2')
+      return {
+        tagsFit,
+        scoresAlign: cards.every((a) =>
+          cards.every((b) => Math.abs(a.top - b.top) > 1 || Math.abs(a.score - b.score) < 1)
+        ),
+        pairAligns: Math.abs(b1.top - b2.top) < 1 && b2.left > b1.right
+      }
+    })
+    expect(layout.tagsFit, `source badges at ${width}px`).toBe(true)
+    expect(layout.scoresAlign, `guidance scores at ${width}px`).toBe(true)
+    if (width > 980) expect(layout.pairAligns, `chart pair at ${width}px`).toBe(true)
   }
   await expect(page.locator('header a[href="/benchmark/medskillaudit"]')).toHaveCount(0)
   await expect(page.locator('header [data-testid="desktop-nav-trigger-benchmark"]')).toHaveCount(0)
+})
+
+test('the first pointer click works during entrance motion', async ({ page, isMobile }) => {
+  const figure = page.locator('figure').filter({ has: page.locator('#ch-b1') })
+  await expect(figure).toHaveAttribute('data-benchmark-reveal', 'pending')
+  // Freeze a real entrance halfway through so this test cannot pass merely by
+  // waiting for motion to end, as locator.click()/tap() normally would.
+  await figure.evaluate((element) => {
+    const observer = new MutationObserver(() => {
+      const entrance = element.getAnimations()[0]
+      if (!entrance) return
+      entrance.pause()
+      entrance.currentTime = 300
+      observer.disconnect()
+    })
+    observer.observe(element, { attributes: true, attributeFilter: ['data-benchmark-reveal'] })
+  })
+  const filter = page.locator('#ch-b1').getByRole('button', { name: 'Local runs', exact: true })
+  await filter.evaluate((button) => button.scrollIntoView({ block: 'center' }))
+  await expect(figure).toHaveAttribute('data-benchmark-reveal', 'shown')
+  expect(await figure.evaluate((element) => element.getAnimations()[0]?.playState)).toBe('paused')
+  const box = await filter.boundingBox()
+  if (!box) throw new Error('Source filter must have a rendered box')
+  const x = box.x + box.width / 2
+  const y = box.y + box.height / 2
+  if (isMobile) await page.touchscreen.tap(x, y)
+  else await page.mouse.click(x, y)
+  await expect(filter).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('#ch-b1 .bar-row')).toHaveCount(3)
+  await expect.poll(() => figure.evaluate((element) => element.getAnimations().length)).toBe(0)
 })
 
 test('server renders the benchmark content without JavaScript', async ({ browser, baseURL }) => {
@@ -95,5 +174,72 @@ test('server renders the benchmark content without JavaScript', async ({ browser
   await expect(page.getByRole('heading', { name: 'AIPOCH Open-Science Benchmarks' })).toBeVisible()
   await expect(page.locator('#ch-b1 .bar-row')).toHaveCount(24)
   await expect(page.locator('#ch-pf .bar-row').first()).toContainText('0.4554')
+  await expect(page.locator('figure').last()).toHaveCSS('opacity', '1')
+  await expect(page.locator('.ring-progress').first()).toHaveAttribute(
+    'stroke-dashoffset',
+    '0.6692'
+  )
   await context.close()
+})
+
+test('reveals upcoming charts once and draws their bars on entry', async ({ page }) => {
+  const figure = page.locator('figure').filter({ has: page.locator('#ch-litqa') })
+  await expect(figure).toHaveAttribute('data-benchmark-reveal', 'pending')
+  await figure.scrollIntoViewIfNeeded()
+  await expect(figure).toHaveAttribute('data-benchmark-reveal', 'shown')
+  expect(
+    await figure
+      .locator('.bar')
+      .first()
+      .evaluate((bar) =>
+        bar
+          .getAnimations()
+          .some((animation) =>
+            (animation.effect as KeyframeEffect)
+              .getKeyframes()
+              .some((frame) => frame.transform === 'scaleX(0)')
+          )
+      )
+  ).toBe(true)
+  await expect
+    .poll(() => figure.evaluate((node) => node.getAnimations({ subtree: true }).length))
+    .toBe(0)
+  await page.locator('h1').scrollIntoViewIfNeeded()
+  await figure.scrollIntoViewIfNeeded()
+  // Hover transitions may run under a stationary pointer after scrolling; only entrance animations must stay finished.
+  expect(
+    await figure.evaluate(
+      (node) =>
+        node
+          .getAnimations({ subtree: true })
+          .filter((animation) => !(animation instanceof CSSTransition)).length
+    )
+  ).toBe(0)
+})
+
+test('uses the v7 palette and gray hover fills', async ({ page, isMobile }) => {
+  await expect(
+    page.locator('#ch-b1 .legend span').filter({ hasText: 'Claude Code' }).locator('i')
+  ).toHaveCSS('background-color', 'rgb(208, 138, 98)')
+  await expect(
+    page.locator('#ch-pf .legend span').filter({ hasText: 'RoboPhD' }).locator('i')
+  ).toHaveCSS('background-color', 'rgb(207, 143, 169)')
+  if (!isMobile) {
+    for (const selector of ['.stat', '#ch-litqa .bar-row', '.level-row', '.distractor-row']) {
+      const target = page.locator(selector).first()
+      await target.hover()
+      await expect(target).toHaveCSS('background-color', 'rgb(242, 241, 236)')
+    }
+  }
+})
+
+test('reduced motion keeps every section and chart immediately readable', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await expect(page.locator('[data-benchmark-reveal="pending"]')).toHaveCount(0)
+  await page.reload()
+  await expect(page.locator('figure').last()).toHaveCSS('opacity', '1')
+  const chart = page.locator('#ch-b4')
+  await chart.scrollIntoViewIfNeeded()
+  expect(await chart.evaluate((node) => node.getAnimations({ subtree: true }).length)).toBe(0)
+  await expect(chart.locator('.bar-row')).toHaveCount(23)
 })

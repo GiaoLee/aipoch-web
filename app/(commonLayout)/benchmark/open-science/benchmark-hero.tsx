@@ -14,8 +14,8 @@ export function BenchmarkHero() {
   return (
     <section className="benchmark-hero">
       <div className="hero-backdrop" aria-hidden="true">
-        {/* biome-ignore lint/performance/noImgElement: Use the exact shared artwork and Figma crop. */}
-        <img src="/figma/audit/75fa7.png" width={1920} height={966} alt="" />
+        {/* biome-ignore lint/performance/noImgElement: Scale the shared artwork edge to edge, preserving its original proportions. */}
+        <img src="/figma/audit/75fa7.png" width={1672} height={941} alt="" />
         <div />
       </div>
       <div className="hero-content">

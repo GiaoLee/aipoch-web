@@ -17,14 +17,14 @@ import {
 } from './benchmark-results'
 
 const colors: Record<AgentGroup, string> = {
-  aipoch: '#afd670',
-  codex: '#759eb8',
-  claude: '#f06e14',
-  react: '#edb732',
-  smol: '#147047',
-  asta: '#915600',
-  robo: '#b91c1c',
-  other: 'rgb(107 107 102 / 65%)'
+  aipoch: 'var(--bench-green)',
+  codex: 'var(--bench-codex)',
+  claude: 'var(--bench-claude)',
+  react: 'var(--bench-react)',
+  smol: 'var(--bench-smol)',
+  asta: 'var(--bench-asta)',
+  robo: 'var(--bench-robo)',
+  other: 'var(--bench-other)'
 }
 const names: Record<AgentGroup, string> = {
   aipoch: 'AIPOCH Open-Science',
@@ -97,10 +97,10 @@ function Detail({
       <TooltipContent
         sideOffset={12}
         collisionPadding={8}
-        className="max-w-[min(320px,calc(100vw-16px))] rounded-none bg-[#111] p-3 text-xs text-white"
+        className="benchmark-tooltip max-w-[min(320px,calc(100vw-16px))] rounded-none bg-[#111] p-3 text-xs text-[#d8d5cc]"
       >
-        <strong>{record.system}</strong>
-        <div className="my-1 break-words font-mono text-[11px] text-white/70">{record.model}</div>
+        <strong className="text-white">{record.system}</strong>
+        <div className="my-1 break-words font-mono text-[11px] text-[#b5b3ac]">{record.model}</div>
         <div>
           Score: <b className="font-mono text-[#afd670]">{record.score}</b>
         </div>
@@ -225,10 +225,8 @@ export function BarChart({ kind }: { kind: 'litqa' | 'pf' | 'b1' | 'b2' | 'b3' |
               className={`bar-row ${record.group === 'aipoch' ? 'me' : ''}`}
             >
               <span className="lab">
-                {record.system}
+                <span className="agent-name">{record.system}</span>
                 <em>
-                  {' '}
-                  ·{' '}
                   {kind === 'litqa'
                     ? record.model.split('/').at(-1)
                     : kind === 'pf'
@@ -267,28 +265,39 @@ export function QueryTypes() {
           'Semantic',
           48,
           0.3308,
-          'semantic-ring.svg',
           'Understands a research topic and finds papers whose content matches it.'
         ],
         [
           'Specific paper',
           10,
           0.8286,
-          'specific-ring.svg',
           'Pins down one particular paper from the clues given.'
         ],
         [
           'Metadata',
           8,
           0.7359,
-          'metadata-ring.svg',
           'Finds papers by author, year and other bibliographic fields.'
         ]
-      ].map(([name, count, score, asset, description]) => (
+      ].map(([name, count, score, description]) => (
         <div className="type" key={name}>
           <div className="benchmark-score-ring">
-            {/* biome-ignore lint/performance/noImgElement: Preserve the supplied Figma SVG geometry. */}
-            <img src={`/figma/benchmark/${asset}`} width={84} height={84} alt="" />
+            <svg width={84} height={84} viewBox="0 0 84 84" fill="none" aria-hidden="true">
+              <circle cx={42} cy={42} r={36} stroke="var(--bench-line)" strokeWidth={7} />
+              <circle
+                className="ring-progress"
+                cx={42}
+                cy={42}
+                r={36}
+                pathLength={1}
+                stroke="var(--bench-green)"
+                strokeWidth={7}
+                strokeLinecap="round"
+                strokeDasharray={1}
+                strokeDashoffset={1 - Number(score)}
+                transform="rotate(-90 42 42)"
+              />
+            </svg>
             <span>{Number(score).toFixed(4).slice(1)}</span>
           </div>
           <div className="nm">{name}</div>
@@ -458,14 +467,16 @@ function SwarmRow({
               background:
                 record.source === 'val'
                   ? record.group === 'aipoch'
-                    ? 'rgb(175 214 112 / 8%)'
+                    ? 'var(--bench-validation)'
                     : '#fff'
                   : colors[record.group],
               borderColor:
                 record.source === 'val'
-                  ? record.group === 'other'
-                    ? '#6b6b66'
-                    : colors[record.group]
+                  ? record.group === 'aipoch'
+                    ? 'var(--bench-green-ink)'
+                    : record.group === 'other'
+                      ? 'var(--bench-muted)'
+                      : colors[record.group]
                   : '#fff'
             }}
           />
