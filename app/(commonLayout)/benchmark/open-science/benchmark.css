@@ -535,6 +535,8 @@
   gap: 16px;
 }
 .science-benchmark .step {
+  display: flex;
+  flex-direction: column;
   padding: 16px 14px;
   border: 1px solid var(--bench-line);
   background: #f7f7f5;
@@ -588,7 +590,8 @@
     36px / 1.2 'Times New Roman',
     serif;
   font-variant-numeric: lining-nums tabular-nums;
-  margin-top: 12px;
+  padding-top: 12px;
+  margin-top: auto;
 }
 .science-benchmark .step small {
   display: block;

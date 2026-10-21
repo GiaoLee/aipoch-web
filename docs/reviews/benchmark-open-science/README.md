@@ -106,6 +106,20 @@ Only `/benchmark/open-science` is affected. `OPEN_SCIENCE_BENCHMARK_LAST_MODIFIE
 
 ## PR #42 final validation — 21 October 2026
 
-Consolidated the responsive, v7, and typography/label follow-ups into the existing PR. Removed screenshot changes from the final diff and screenshot embeds from the PR description. Final regression testing exposed an intermittent mobile filter click during entrance motion; pointer interaction now waits until the 600ms entrance completes, while keyboard focus can settle the animation immediately. The one-time reveal test excludes hover CSS transitions from its entrance-animation assertion. No validation configuration was changed.
+Consolidated the responsive, v7, and typography/label follow-ups into the existing PR. Removed screenshot changes from the final diff and screenshot embeds from the PR description. Further review replaced the temporary pointer lock during entrance motion with a stable press target: pointer-down pauses movement until click/release, and keyboard focus can settle motion immediately. The one-time reveal test excludes hover CSS transitions from its entrance-animation assertion. No validation configuration was changed.
 
 Final checks: TypeScript and focused Biome lint passed; 30 navbar/benchmark/sitemap unit tests and all 16 desktop/mobile benchmark browser cases passed.
+
+
+## PR #42 regression audit — 21 October 2026
+
+Reviewed the complete PR, including the original responsive changes and every follow-up. Reproduced and fixed two user-visible issues:
+
+- The entrance animation disabled pointer events for 600ms, dropping an immediate first click/tap. Hold the entrance at its current position from pointer-down through click, then finish it. Handle releases outside the article, cancelled gestures, reduced-motion changes, and component cleanup; keyboard focus remains immediately usable. A regression freezes a real entrance midway and sends a physical pointer click/tap without Playwright's animation-stability waiting.
+- At 320–360px, wrapped guidance text pushed scores to different heights within the same grid row. Use a column flex layout and anchor each score to the card bottom with the existing minimum gap. Verify alignment together with source-badge bounds, desktop chart pairs, hero edge alignment/aspect ratio, and page overflow at 11 widths from 320 to 2880px.
+
+The audit also fixed a test setup race: Cookie consent appears after hydration, so a synchronous visibility check could miss the banner and leave it covering the mobile chart. Tests now wait for dismissal before interacting. Hover CSS transitions remain excluded only from the one-time entrance-animation assertion.
+
+Only `/benchmark/open-science` changes during this audit. Its persistent `OPEN_SCIENCE_BENCHMARK_LAST_MODIFIED` is already the actual date `2026-10-21`; metadata and sitemap unit tests verify that value while preserving unrelated dates and exclusions. No protected operational configuration, dependencies, or API contracts changed. No screenshots are included in the PR.
+
+Audit validation: `bun run test:unit` passed all 465 tests; `bun run typecheck`, `bun run build`, focused Biome lint, and diff whitespace checks passed. The expanded benchmark suite passed all 36 cases (desktop and mobile Chromium, two repetitions). Navigation regression tests passed both applicable cases, with two intentional device-specific skips. Final mock-browser smoke checks verified SPA navigation back to the benchmark and filtering, mobile Docs text alignment, retained Download padding, rendered sitemap dates, and zero page errors. Local preview is available on port 3202.

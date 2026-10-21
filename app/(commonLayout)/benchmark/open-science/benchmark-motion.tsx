@@ -33,6 +33,13 @@ export function BenchmarkMotion({ children }: { children: ReactNode }) {
     const targets = [...element.querySelectorAll<HTMLElement>(revealTargets)]
     const shown = new Set<Element>()
     const animations = new Set<Animation>()
+    let heldEntrance: Animation | undefined
+    let releaseFrame = 0
+    const finishPointerEntrance = () => {
+      cancelAnimationFrame(releaseFrame)
+      heldEntrance?.finish()
+      heldEntrance = undefined
+    }
     const play = (target: Element, frames: Keyframe[], options: KeyframeAnimationOptions) => {
       const animation = target.animate(frames, { fill: 'backwards', ...options })
       animations.add(animation)
@@ -47,8 +54,8 @@ export function BenchmarkMotion({ children }: { children: ReactNode }) {
       play(
         target,
         [
-          { opacity: 0, transform: 'translateY(14px)', pointerEvents: 'none' },
-          { opacity: 1, transform: 'none', pointerEvents: 'none' }
+          { opacity: 0, transform: 'translateY(14px)' },
+          { opacity: 1, transform: 'none' }
         ],
         { duration: 600, easing: 'ease' }
       )
@@ -104,28 +111,54 @@ export function BenchmarkMotion({ children }: { children: ReactNode }) {
       }
     }
 
-    // Focus reveals offscreen controls and settles their container before interaction.
+    // Hold the hit target in place from pointer-down through click. Finishing on
+    // pointer-induced focus can move a button out from under the release position.
+    const holdPointerEntrance = (event: PointerEvent) => {
+      if (!(event.target instanceof Element)) return
+      finishPointerEntrance()
+      const target = event.target.closest<HTMLElement>('[data-benchmark-reveal]')
+      heldEntrance = target?.getAnimations().find((animation) => animations.has(animation))
+      heldEntrance?.pause()
+    }
+    const releasePointerEntrance = () => {
+      // Click normally settles the animation first; also cover releases outside
+      // the article and gestures that produce no click.
+      if (heldEntrance) releaseFrame = requestAnimationFrame(finishPointerEntrance)
+    }
+    // Keyboard focus settles motion immediately without interfering with a tap.
     const revealFocused = (event: FocusEvent) => {
       if (!(event.target instanceof Element)) return
       const target = event.target.closest<HTMLElement>('[data-benchmark-reveal]')
       if (target) {
         reveal(target, true)
-        for (const animation of target.getAnimations()) animation.finish()
+        for (const animation of target.getAnimations()) {
+          if (animations.has(animation) && animation !== heldEntrance) animation.finish()
+        }
         observer.unobserve(target)
       }
     }
     const showAll = () => {
       if (!reduce.matches) return
       observer.disconnect()
+      finishPointerEntrance()
       for (const animation of animations) animation.cancel()
       animations.clear()
       for (const target of targets) reveal(target, true)
     }
     element.addEventListener('focusin', revealFocused)
+    element.addEventListener('pointerdown', holdPointerEntrance, true)
+    element.addEventListener('click', finishPointerEntrance, true)
+    window.addEventListener('pointerup', releasePointerEntrance, true)
+    window.addEventListener('pointercancel', finishPointerEntrance, true)
     reduce.addEventListener('change', showAll)
     return () => {
       observer.disconnect()
+      cancelAnimationFrame(releaseFrame)
       element.removeEventListener('focusin', revealFocused)
+      element.removeEventListener('pointerdown', holdPointerEntrance, true)
+      element.removeEventListener('click', finishPointerEntrance, true)
+      window.removeEventListener('pointerup', releasePointerEntrance, true)
+      window.removeEventListener('pointercancel', finishPointerEntrance, true)
       reduce.removeEventListener('change', showAll)
       for (const animation of animations) animation.cancel()
       for (const target of targets) delete target.dataset.benchmarkReveal
