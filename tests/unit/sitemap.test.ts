@@ -12,6 +12,10 @@ mock.module('@/service/open-science-use-cases.server', () => ({
     { slug: 'diet-diversity-does-the-gut-microbiome-differ', title: 'Diet Diversity' },
     { slug: 'nvda-all-at-once-or-four-weeks', title: 'NVDA: ALL AT ONCE OR FOUR WEEKS?' },
     {
+      slug: 'first-flight-vs-evening-flight-which-is-more-reliable',
+      title: 'First Flight vs. Evening Flight - Which Is More Reliable'
+    },
+    {
       slug: 'can-a-simple-algorithm-beat-ai-at-wordle',
       title: 'Can a Simple Algorithm Beat AI at Wordle'
     }
@@ -100,10 +104,11 @@ describe('sitemap', () => {
         new Date(date)
       )
     }
-    // Every replay uses the updated shared reviewer presentation.
+    // Track the October 20 replay SDK update independently of the gallery.
     for (const path of [
       '/open-science/use-cases/diet-diversity-does-the-gut-microbiome-differ/replay',
       '/open-science/use-cases/nvda-all-at-once-or-four-weeks/replay',
+      '/open-science/use-cases/first-flight-vs-evening-flight-which-is-more-reliable/replay',
       '/open-science/use-cases/can-a-simple-algorithm-beat-ai-at-wordle/replay'
     ]) {
       expect(routes.find((route) => route.url === `${siteDomain}${path}`)?.lastModified).toEqual(

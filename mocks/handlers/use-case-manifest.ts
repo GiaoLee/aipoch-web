@@ -15,6 +15,10 @@ export const useCaseManifestHandlers = (origin: string) => {
   let requests = 0
   let notModified = 0
   let lastValidator: string | null = null
+  let discoveryMode = 'available'
+  let packageMode = 'normal'
+  let packageDelayMs = 0
+  let packageRequests = 0
   return [
     http.get(`${origin}/use-case-manifest/manifest.json`, async ({ request }) => {
       requests += 1
@@ -39,7 +43,9 @@ export const useCaseManifestHandlers = (origin: string) => {
               title: `${item.title}${responseSuffix}`,
               case: {
                 ...item.case,
-                release_url: '',
+                release_url: item.case.release_url
+                  ? `${origin}/use-case-manifest/releases/${item.name}.science`
+                  : '',
                 bytes: packages.get(item.name)?.sizeBytes,
                 sha256: packages.get(item.name)?.sha256
               }
@@ -53,30 +59,48 @@ export const useCaseManifestHandlers = (origin: string) => {
         revision,
         requests,
         notModified,
-        lastValidator
+        lastValidator,
+        packageRequests,
+        discoveryMode
       })
     ),
     http.put(`${origin}/__mock/use-case-manifest`, async ({ request }) => {
       const update = (await request.json()) as {
+        discoveryMode?: string
         mode?: string
         titleSuffix?: string
         delayMs?: number
+        packageMode?: string
+        packageDelayMs?: number
       }
       if (
+        (update.discoveryMode !== undefined &&
+          !['available', 'unavailable', 'incompatible', 'timeout'].includes(
+            update.discoveryMode
+          )) ||
         (update.mode !== undefined &&
           !['normal', 'empty', 'error', 'invalid'].includes(update.mode)) ||
         (update.titleSuffix !== undefined && typeof update.titleSuffix !== 'string') ||
+        (update.packageMode !== undefined &&
+          !['normal', 'error', 'empty', 'oversized'].includes(update.packageMode)) ||
+        (update.packageDelayMs !== undefined &&
+          (!Number.isInteger(update.packageDelayMs) ||
+            update.packageDelayMs < 0 ||
+            update.packageDelayMs > 5000)) ||
         (update.delayMs !== undefined &&
           (!Number.isInteger(update.delayMs) || update.delayMs < 0 || update.delayMs > 5000))
       )
         return new HttpResponse(null, { status: 400 })
+      discoveryMode = update.discoveryMode ?? 'available'
       mode = update.mode ?? 'normal'
       titleSuffix = update.titleSuffix ?? ''
       delayMs = update.delayMs ?? 0
+      packageMode = update.packageMode ?? 'normal'
+      packageDelayMs = update.packageDelayMs ?? 0
       revision += 1
       return HttpResponse.json({ revision })
     }),
-    http.get(`${origin}/use-case-manifest/*`, ({ request }) => {
+    http.get(`${origin}/use-case-manifest/*`, async ({ request }) => {
       const path = decodeURIComponent(
         new URL(request.url).pathname.slice('/use-case-manifest/'.length)
       )
@@ -105,7 +129,19 @@ export const useCaseManifestHandlers = (origin: string) => {
           return HttpResponse.text(`# ${item.title}\n\nLocal sample introduction.`, {
             headers: { 'Content-Type': 'text/markdown' }
           })
-        if (path === `${item.name}/${item.case.file_name}`) {
+        if (
+          path === `${item.name}/${item.case.file_name}` ||
+          (item.case.release_url && path === `releases/${item.name}.science`)
+        ) {
+          packageRequests += 1
+          const responseMode = packageMode
+          if (packageDelayMs) await new Promise((resolve) => setTimeout(resolve, packageDelayMs))
+          if (responseMode === 'error') return new HttpResponse(null, { status: 503 })
+          if (responseMode === 'empty') return new HttpResponse(new Uint8Array())
+          if (responseMode === 'oversized')
+            return new HttpResponse('too large', {
+              headers: { 'Content-Length': String(2 * 1024 ** 3 + 1) }
+            })
           const sample = packages.get(item.name)
           if (!sample) return new HttpResponse(null, { status: 404 })
           return new HttpResponse(sample.bytes as BodyInit, {

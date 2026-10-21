@@ -165,6 +165,18 @@ loads from `<manifest directory>/<case name>/extracted/`.
   restored directories, previews, downloads,
   retries and archive fallback on desktop and mobile.
 
+### Import a replay into Open-Science
+
+On a desktop computer, open Open-Science 1.0.1 or later, then click **Continue in
+Open-Science** below a replay. Allow the browser to open the app and access the
+local network if prompted. After the file is sent, confirm the import in the app.
+
+If the connection times out, open the app and click **I’ve opened Open-Science**
+to retry. You can also download the `.science` package and open it with Open-Science.
+Install the app from the [download page](https://aipoch.com/open-science/download).
+
+Browser import supports packages up to 2 GiB and is unavailable on phones and tablets.
+
 ## Docker Compose
 
 ```sh
