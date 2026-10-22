@@ -37,6 +37,9 @@ export function prepareBrowserImport(blob: Blob): BrowserImportTransfer {
   let cancelled = false
   return {
     url,
+    cancel: async () => {
+      cancelled = true
+    },
     send({ signal, onProgress, onPhase, readyTimeoutMs } = {}) {
       if (cancelled)
         return Promise.reject(Object.assign(new Error('Desktop canceled'), { code: 'cancelled' }))
@@ -51,7 +54,8 @@ export function prepareBrowserImport(blob: Blob): BrowserImportTransfer {
           reject(new DOMException('Canceled', 'AbortError'))
         }
         signal?.addEventListener('abort', abort, { once: true })
-        const deadline = setTimeout(() => state.fail(true), readyTimeoutMs)
+        const deadline =
+          readyTimeoutMs === null ? undefined : setTimeout(() => state.fail(true), readyTimeoutMs)
         const cleanup = () => {
           clearTimeout(deadline)
           signal?.removeEventListener('abort', abort)
