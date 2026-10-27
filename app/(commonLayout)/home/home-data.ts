@@ -1,3 +1,5 @@
+import { openScienceProductFacts } from '@/lib/open-science-product-facts'
+
 export const DEFAULT_SKILL_LIBRARY_COUNT = 597
 
 const compactGithubCountFormatter = new Intl.NumberFormat('en', {
@@ -12,15 +14,19 @@ export const formatCompactGithubCount = (value: number): string => {
 }
 
 export const homeHeroStats = [
-  { value: '25', label: 'OFFICIAL MODEL APIs', detail: '+ CUSTOM GATEWAY' },
-  { value: '4', label: 'AGENT FRAMEWORKS' },
   {
-    value: '548',
-    label: 'marketplace',
-    detail: '+ built in',
+    value: String(openScienceProductFacts.providerPresets),
+    label: 'PROVIDER PRESETS',
+    detail: '+ CUSTOM GATEWAY'
+  },
+  { value: String(openScienceProductFacts.agentFrameworks), label: 'AGENT FRAMEWORKS' },
+  {
+    value: String(openScienceProductFacts.marketplaceSkills),
+    label: 'MARKETPLACE SKILLS',
+    detail: `${openScienceProductFacts.builtInSkills} BUILT-IN SKILLS`,
     testId: 'home-hero-stat-skills'
   },
-  { value: '36', label: 'SCIENCE CONNECTORS' }
+  { value: String(openScienceProductFacts.builtInConnectors), label: 'SCIENCE CONNECTORS' }
 ] as const
 
 export const resolveSkillLibraryCount = (value?: number | null): number =>

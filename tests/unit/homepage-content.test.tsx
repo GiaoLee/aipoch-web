@@ -112,9 +112,12 @@ describe('Figma homepage with existing live data contracts', () => {
     expect([...hero.matchAll(/<strong[^>]*>([^<]+)<\/strong>/g)].map((match) => match[1])).toEqual([
       '25',
       '4',
-      '548',
-      '36'
+      '525',
+      '43'
     ])
+    expect(hero).toContain('MARKETPLACE SKILLS')
+    expect(hero).toContain('23 BUILT-IN SKILLS')
+    expect(hero).toContain('PROVIDER PRESETS')
   })
 
   test('uses API counts, release details, articles, media and overview content', () => {

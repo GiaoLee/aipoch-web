@@ -420,8 +420,8 @@ test('renders the Figma sections with existing API data and no superseded module
   await expect(page.getByTestId('home-hero-stats').locator('strong')).toHaveText([
     '25',
     '4',
-    '548',
-    '36'
+    '525',
+    '43'
   ])
   const spotlight = page.locator('#open-science-spotlight')
   await expect(
