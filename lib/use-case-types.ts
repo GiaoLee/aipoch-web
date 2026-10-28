@@ -227,7 +227,14 @@ export interface UseCaseSession {
   excludedFiles: { storageKey: string; filename: string; sizeBytes: number }[]
 }
 
+export interface UseCaseVideo {
+  type: 'youtube'
+  id: string
+  title?: string
+}
+
 export interface UseCaseIndexEntry {
+  video?: UseCaseVideo
   slug: string
   title: string
   description?: string
@@ -263,6 +270,7 @@ export interface UseCaseReportRef {
 
 /** Detail metadata derived from the shared manifest snapshot. */
 export interface UseCaseDetail {
+  video?: UseCaseVideo
   slug: string
   title: string
   description?: string
@@ -311,6 +319,7 @@ export interface UseCaseManifestResource {
 }
 
 export interface UseCaseManifestItem {
+  video?: { type: string; file_path: string; file_name?: string }
   title: string
   name: string
   cover: UseCaseManifestResource

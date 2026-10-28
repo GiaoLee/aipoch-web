@@ -502,3 +502,56 @@ describe('use-case manifest cache', () => {
     expect(JSON.stringify(error.mock.calls)).not.toContain(url)
   })
 })
+
+test('normalizes optional YouTube video and retains covers for malformed media', () => {
+  const [entry] = parseUseCaseManifest(manifest, url)
+  expect(entry.video).toEqual({ type: 'youtube', id: 'p8qhSTLUpw0', title: manifest[0].title })
+  for (const video of [
+    null,
+    {},
+    { type: 'vimeo', file_path: 'https://youtu.be/p8qhSTLUpw0' },
+    { type: 'youtube', file_path: 'https://youtube.com.evil.test/watch?v=p8qhSTLUpw0' },
+    { type: 'youtube', file_path: 'javascript:alert(1)' },
+    { type: 'youtube', file_path: 'https://youtu.be/invalid' }
+  ]) {
+    const [item] = parseUseCaseManifest([{ ...manifest[0], video }], url)
+    expect(item.video).toBeUndefined()
+    expect(item.preview?.image).toBe(entry.preview?.image)
+  }
+  for (const file_path of [
+    'https://www.youtube.com/watch?v=p8qhSTLUpw0',
+    'https://youtu.be/p8qhSTLUpw0?si=example',
+    'https://youtube.com/shorts/p8qhSTLUpw0'
+  ]) {
+    expect(
+      parseUseCaseManifest([{ ...manifest[0], video: { type: 'youtube', file_path } }], url)[0]
+        .video?.id
+    ).toBe('p8qhSTLUpw0')
+  }
+})
+
+test('maps video metadata independently for any case without affecting cases without video', () => {
+  const entries = parseUseCaseManifest(
+    [
+      manifest[0],
+      {
+        ...manifest[1],
+        video: {
+          type: 'youtube',
+          file_path: 'https://youtu.be/abcdefghijk',
+          file_name: 'Another case video'
+        }
+      },
+      manifest[2]
+    ],
+    url
+  )
+  expect(entries[0].video?.id).toBe('p8qhSTLUpw0')
+  expect(entries[1].video).toEqual({
+    type: 'youtube',
+    id: 'abcdefghijk',
+    title: 'Another case video'
+  })
+  expect(entries[2].video).toBeUndefined()
+  expect(entries.every((entry) => Boolean(entry.preview?.image))).toBe(true)
+})

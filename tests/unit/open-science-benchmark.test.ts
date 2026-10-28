@@ -50,7 +50,7 @@ describe('Open-Science benchmark snapshot', () => {
     expect(String(benchmarkMetadata.alternates?.canonical)).toEndWith('/benchmark/open-science')
     expect(benchmarkStructuredData()['@graph'][1]).toMatchObject({
       datePublished: '2026-10-19',
-      dateModified: '2026-10-21T00:00:00.000Z'
+      dateModified: '2026-10-28T00:00:00.000Z'
     })
   })
 })

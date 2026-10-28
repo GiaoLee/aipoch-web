@@ -54,6 +54,7 @@ export const fetchUseCaseDetail = async (slug: string): Promise<UseCaseDetail | 
       slug: entry.slug,
       title: entry.title,
       coverImage: entry.preview?.image,
+      video: entry.video,
       package: entry.package,
       introductionUrl: entry.introductionUrl
     }

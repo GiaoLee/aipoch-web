@@ -21,7 +21,12 @@
       "path": null
     },
     "catalog": "Science",
-    "catalog_name": "science"
+    "catalog_name": "science",
+    "video": {
+      "type": "youtube",
+      "file_path": "https://youtu.be/p8qhSTLUpw0",
+      "file_name": "Can a Simple Algorithm Beat AI at Wordle"
+    }
   },
   {
     "title": "Can AI Spot the Errors in a Spreadsheet",
