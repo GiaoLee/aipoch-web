@@ -12,6 +12,7 @@ import { ScienceImportProvider } from '../_components/science-import-controls'
 import { ShareRow } from '../_components/share-row'
 import { UseCaseActions } from '../_components/use-case-actions'
 import { UseCaseBackLink } from '../_components/use-case-navigation'
+import { UseCaseVideoPlayer } from '../_components/use-case-video'
 
 // Markdown styles come from app/globals.css → session-transcript.css; do not
 // re-import that file here — Turbopack panics compiling it as a page CSS entry.
@@ -207,7 +208,7 @@ export default async function OpenScienceUseCaseIntroPage({ params }: PageProps)
             </div>
 
             {heroImageUrl ? (
-              <div className="mt-8 overflow-hidden border border-[#e4e4df] bg-white">
+              <div className="relative mt-8 overflow-hidden border border-[#e4e4df] bg-white">
                 {/* biome-ignore lint/performance/noImgElement: exported artifact asset, no Next image rewriting needed. */}
                 <img
                   src={heroImageUrl}
@@ -216,6 +217,9 @@ export default async function OpenScienceUseCaseIntroPage({ params }: PageProps)
                   loading="lazy"
                   decoding="async"
                 />
+                {useCase.video ? (
+                  <UseCaseVideoPlayer key={useCase.video.id} video={useCase.video} />
+                ) : null}
               </div>
             ) : null}
           </div>

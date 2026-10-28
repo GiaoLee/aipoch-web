@@ -121,7 +121,12 @@ export default async function OpenScienceUseCasesPage({ searchParams }: PageProp
             key={activeCategory ?? 'all'}
             category={activeCategory}
             initialCount={initialCount}
-            items={visibleUseCases.map(({ slug, title, preview }) => ({ slug, title, preview }))}
+            items={visibleUseCases.map(({ slug, title, preview, video }) => ({
+              slug,
+              title,
+              preview,
+              video
+            }))}
           />
         )}
       </section>

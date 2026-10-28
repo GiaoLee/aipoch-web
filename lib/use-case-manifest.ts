@@ -1,4 +1,5 @@
 import type { UseCaseManifestEntry, UseCaseManifestResource } from './use-case-types'
+import { parseUseCaseVideo } from './use-case-video'
 
 type ScheduleAfterResponse = (task: () => Promise<void>) => unknown
 type Snapshot = { entries: UseCaseManifestEntry[]; etag: string | null }
@@ -109,6 +110,7 @@ export const parseUseCaseManifest = (
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, '')
 
+    const video = parseUseCaseVideo(item.video)
     return {
       slug: item.name,
       title: item.title,
@@ -119,6 +121,7 @@ export const parseUseCaseManifest = (
             ...(catalogKey ? { catalogKey } : {})
           }),
       preview: { image: resourceUrl(cover) },
+      ...(video ? { video } : {}),
       package: {
         extractedBaseUrl: new URL(`${item.name}/extracted/`, base).href,
         url: releaseUrl

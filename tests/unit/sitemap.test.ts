@@ -93,12 +93,12 @@ describe('sitemap', () => {
     const { default: sitemap } = await import('../../app/sitemap')
     const routes = await sitemap()
     expect(routes.some((route) => route.url.includes('/replay/dot-science'))).toBe(false)
-    // Keep the gallery metadata date and the newer overview import workflow date.
+    // Track gallery and overview media changes independently from replay pages.
     for (const [path, date] of [
-      ['/open-science/use-cases', '2026-10-21'],
-      ['/open-science/use-cases/diet-diversity-does-the-gut-microbiome-differ', '2026-10-23'],
-      ['/open-science/use-cases/nvda-all-at-once-or-four-weeks', '2026-10-23'],
-      ['/open-science/use-cases/can-a-simple-algorithm-beat-ai-at-wordle', '2026-10-23']
+      ['/open-science/use-cases', '2026-10-28'],
+      ['/open-science/use-cases/diet-diversity-does-the-gut-microbiome-differ', '2026-10-28'],
+      ['/open-science/use-cases/nvda-all-at-once-or-four-weeks', '2026-10-28'],
+      ['/open-science/use-cases/can-a-simple-algorithm-beat-ai-at-wordle', '2026-10-28']
     ]) {
       expect(routes.find((route) => route.url === `${siteDomain}${path}`)?.lastModified).toEqual(
         new Date(date)
@@ -233,7 +233,7 @@ describe('sitemap', () => {
         Date.parse('2026-10-20')
       )
     }
-    expect(routeDate(`${siteDomain}/benchmark/open-science`)).toBe('2026-10-21T00:00:00.000Z')
+    expect(routeDate(`${siteDomain}/benchmark/open-science`)).toBe('2026-10-28T00:00:00.000Z')
     expect(routeDate(`${siteDomain}/benchmark/medskillaudit`)).toBe('2026-10-21T00:00:00.000Z')
     for (const excluded of [
       '/medskillaudit',

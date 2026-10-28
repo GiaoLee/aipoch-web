@@ -19,7 +19,7 @@ export function BenchmarkHero() {
         <div />
       </div>
       <div className="hero-content">
-        <h1>AIPOCH Open-Science Benchmarks</h1>
+        <h1>Open-Science Benchmarks</h1>
         <p className="tag">
           Explore AIPOCH Open-Science’s results across scientific benchmarks, with evaluation
           methods, configurations, and supporting evidence.

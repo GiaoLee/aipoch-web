@@ -108,3 +108,11 @@ test('keeps the category filter on pagination links', async () => {
   expect(filtered).toContain('Showing 6 of 8 use cases')
   expect(filtered).toContain('page=2&amp;category=science#use-case-grid')
 })
+
+test('passes optional video metadata into gallery cards without eagerly loading a player', async () => {
+  result = [{ ...entries[0], video: { type: 'youtube', id: 'p8qhSTLUpw0' } }, entries[1]]
+  const html = await render()
+  expect(html.match(/data-testid="video-play-indicator"/g)).toHaveLength(1)
+  expect(html).toContain('/case-1.png')
+  expect(html).not.toContain('<iframe')
+})

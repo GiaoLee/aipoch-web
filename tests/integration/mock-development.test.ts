@@ -235,7 +235,7 @@ describe('mock development end to end', () => {
           .evaluate((image) => (image as HTMLImageElement).naturalWidth)
       ).toBeGreaterThan(0)
       await page.getByRole('link', { name: 'Load more use cases', exact: true }).click()
-      expect(await page.locator('main img').count()).toBe(12)
+      await browserExpect(page.locator('main img')).toHaveCount(12)
       await page.goto(`${web}/open-science/use-cases/${manifestSample[0].name}`)
       await page.getByText('Local sample introduction.', { exact: true }).waitFor()
       // Shared typography must apply during SSR, even without client JavaScript.
@@ -295,10 +295,10 @@ describe('mock development end to end', () => {
       const sitemap = (await (await fetch(`${web}/sitemap.xml`)).text()).replace(/>\s+</g, '><')
       for (const item of manifestSample) {
         expect(sitemap).toContain(
-          `/open-science/use-cases/${item.name}</loc><lastmod>2026-10-22T00:00:00.000Z</lastmod>`
+          `/open-science/use-cases/${item.name}</loc><lastmod>2026-10-28T00:00:00.000Z</lastmod>`
         )
         expect(sitemap).toContain(
-          `/open-science/use-cases/${item.name}/replay</loc><lastmod>2026-10-22T00:00:00.000Z</lastmod>`
+          `/open-science/use-cases/${item.name}/replay</loc><lastmod>2026-10-23T00:00:00.000Z</lastmod>`
         )
         const detailHtml = await (await fetch(`${web}/open-science/use-cases/${item.name}`)).text()
         expect(detailHtml).toContain(`href="/open-science/use-cases/${item.name}/replay"`)
@@ -513,6 +513,113 @@ describe('mock development end to end', () => {
     }
   }
 
+  test('video covers survive loading/errors and previews preserve card navigation', async () => {
+    const browser = await chromium.launch()
+    try {
+      // Keep the YouTube transport stub observable after MSW takes control on reload.
+      const page = await browser.newPage({ serviceWorkers: 'block' })
+      await page.route('https://www.youtube.com/iframe_api', (route) =>
+        route.fulfill({
+          contentType: 'application/javascript',
+          body: `window.YT = { Player: class {
+          constructor(mount, options) {
+            this.frame = document.createElement('iframe');
+            this.frame.dataset.videoId = options.videoId;
+            this.frame.dataset.controls = options.playerVars.controls;
+            mount.replaceWith(this.frame);
+            this.listener = event => {
+              if (event.detail === 'play') options.events.onStateChange({ data: 1 });
+              if (event.detail === 'error') options.events.onError();
+              if (event.detail === 'blocked') options.events.onAutoplayBlocked();
+            };
+            window.addEventListener('test-video', this.listener);
+            setTimeout(() => options.events.onReady({ target: this }), 0);
+          }
+          getIframe() { return this.frame; }
+          mute() { this.frame.dataset.muted = 'true'; }
+          playVideo() { this.frame.dataset.autoplay = 'true'; }
+          destroy() { window.removeEventListener('test-video', this.listener); this.frame.remove(); }
+        }};`
+        })
+      )
+      const signal = (value: string) =>
+        page.evaluate((value) => {
+          window.dispatchEvent(new CustomEvent('test-video', { detail: value }))
+        }, value)
+      await page.goto(`${web}/open-science/use-cases`)
+      const cards = page.getByTestId('use-case-grid').getByRole('link')
+      const card = cards.first()
+      await browserExpect(card.getByTestId('video-play-indicator')).toBeVisible()
+      await browserExpect(cards.nth(1).getByTestId('video-play-indicator')).toHaveCount(0)
+      await browserExpect(page.locator('iframe[data-video-id]')).toHaveCount(0)
+      await card.hover()
+      await browserExpect(card.getByText('Loading video…')).toHaveCount(0)
+      await browserExpect(card.locator('iframe[data-muted="true"]')).toHaveCount(1)
+      await browserExpect(card.getByTestId('use-case-video')).toHaveAttribute(
+        'data-playing',
+        'false'
+      )
+      await browserExpect(card.getByTestId('use-case-video')).toHaveCSS(
+        'background-color',
+        'rgba(0, 0, 0, 0)'
+      )
+      // The player is visible during loading, before any PLAYING event.
+      await browserExpect(card.getByTestId('use-case-video')).toHaveCSS('opacity', '1')
+      await browserExpect(card.locator('iframe')).toBeVisible()
+      await browserExpect(card.locator('iframe')).toHaveCSS('pointer-events', 'none')
+      await browserExpect(card.getByTestId('video-preview-hit-area')).toBeVisible()
+      await signal('play')
+      await browserExpect(card.getByTestId('use-case-video')).toHaveAttribute(
+        'data-playing',
+        'true'
+      )
+      await cards.nth(1).hover()
+      await browserExpect(card.locator('iframe')).toHaveCount(0)
+      await card.hover()
+      await browserExpect(card.locator('iframe')).toHaveCount(1)
+      await signal('play')
+      await card.click()
+      await browserExpect(page).toHaveURL(`${web}/open-science/use-cases/${manifestSample[0].name}`)
+      await browserExpect(
+        page.locator('iframe[data-controls="1"][data-autoplay="true"]')
+      ).toHaveCount(1)
+      await signal('play')
+      await browserExpect(page.getByTestId('use-case-video')).toHaveAttribute(
+        'data-playing',
+        'true'
+      )
+      await signal('error')
+      await browserExpect(page.getByTestId('use-case-video')).toHaveCount(0)
+      await browserExpect(
+        page.getByRole('img', { name: manifestSample[0].title, exact: true })
+      ).toBeVisible()
+      await page.reload()
+      await browserExpect(page.locator('iframe[data-video-id]')).toHaveCount(1)
+      await signal('blocked')
+      await browserExpect(page.getByTestId('use-case-video')).toHaveCount(0)
+      await page.clock.install()
+      await page.reload()
+      await browserExpect(page.locator('iframe[data-video-id]')).toHaveCount(1)
+      await page.clock.fastForward(16000)
+      await browserExpect(page.getByTestId('use-case-video')).toHaveCount(0)
+      await page.clock.resume()
+      await page.unroute('https://www.youtube.com/iframe_api')
+      await page.route('https://www.youtube.com/iframe_api', (route) => route.abort())
+      await page.reload()
+      await browserExpect(page.getByTestId('use-case-video')).toHaveCount(0)
+      await browserExpect(
+        page.getByRole('img', { name: manifestSample[0].title, exact: true })
+      ).toBeVisible()
+      await page.goto(`${web}/open-science/use-cases/${manifestSample[1].name}`)
+      await browserExpect(page.getByTestId('use-case-video')).toHaveCount(0)
+      await browserExpect(
+        page.getByRole('img', { name: manifestSample[1].title, exact: true })
+      ).toBeVisible()
+    } finally {
+      await browser.close()
+    }
+  }, 120000)
+
   test('renders server data, linked details and sitemap without a business backend', async () => {
     // The state adapter intentionally cannot serve read-only business fixtures.
     expect((await fetch(`${api}/api/v1/skills`)).status).toBe(404)
@@ -525,7 +632,7 @@ describe('mock development end to end', () => {
       ['/leaderboard/items/literature-review-result', 'literature-review'],
       ['/compare/literature-review-vs-clinical-trials', 'Literature Review'],
       ['/open-science/download', '1.0.0-mock'],
-      ['/benchmark/open-science', 'AIPOCH Open-Science Benchmarks'],
+      ['/benchmark/open-science', 'Open-Science Benchmarks'],
       ['/benchmark/medskillaudit', 'MedSkillAudit']
     ]) {
       const response = await fetch(`${web}${path}`)
@@ -549,20 +656,20 @@ describe('mock development end to end', () => {
     const sitemap = await (await fetch(`${web}/sitemap.xml`)).text()
     expect(sitemap).toContain('/agent-skills/literature-review</loc>')
     for (const [path, date] of [
-      ['', '2026-10-20'],
+      ['', '2026-10-27'],
       ['/agent-skills/list', '2026-10-20'],
       ['/agent-skills/literature-review', '2026-10-20'],
       ['/blog', '2026-10-20'],
       ['/blog/release-notes', '2026-10-20'],
-      ['/benchmark/open-science', '2026-10-20'],
-      ['/benchmark/medskillaudit', '2026-10-20']
+      ['/benchmark/open-science', '2026-10-28'],
+      ['/benchmark/medskillaudit', '2026-10-21']
     ]) {
       expect(sitemap).toContain(
         `<loc>https://aipoch.com${path}</loc>\n<lastmod>${date}T00:00:00.000Z</lastmod>`
       )
     }
     expect(sitemap).toContain(
-      '<loc>https://aipoch.com/open-science/download</loc>\n<lastmod>2026-10-20T00:00:00.000Z</lastmod>'
+      '<loc>https://aipoch.com/open-science/download</loc>\n<lastmod>2026-10-21T00:00:00.000Z</lastmod>'
     )
     expect(sitemap).not.toContain('<loc>https://aipoch.com/medskillaudit</loc>')
     expect(sitemap).not.toContain('/leaderboard')

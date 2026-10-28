@@ -73,6 +73,7 @@ test('maps manifest details without inventing dates or reports', async () => {
   )
   const detail = await fetchUseCaseDetail(manifest[0].name)
   expect(detail).toEqual({
+    video: { type: 'youtube', id: 'p8qhSTLUpw0', title: manifest[0].title },
     slug: manifest[0].name,
     title: manifest[0].title,
     coverImage:
