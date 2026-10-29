@@ -13,13 +13,13 @@ test.beforeEach(async ({ page }) => {
 test('renders the complete article, metadata, hero artwork, and score rings', async ({
   page
 }, testInfo) => {
-  await expect(page.getByRole('heading', { name: 'AIPOCH Open-Science Benchmarks' })).toBeVisible()
-  await expect(page.locator('figure')).toHaveCount(14)
+  await expect(page.getByRole('heading', { name: 'Open-Science Benchmarks' })).toBeVisible()
+  await expect(page.locator('figure')).toHaveCount(17)
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     'href',
     /\/benchmark\/open-science$/
   )
-  await expect(page.locator('#ch-litqa .bar-row')).toHaveCount(30)
+  await expect(page.locator('#ch-litqa .bar-row')).toHaveCount(31)
   await expect(page.locator('#ch-pf .bar-row')).toHaveCount(34)
   await expect(page.locator('#ch-b1 .bar-row')).toHaveCount(24)
   await expect(page.locator('.distractor-row')).toHaveCount(23)
@@ -57,7 +57,7 @@ test('chart filters remain independent and preserve reference rows', async ({ pa
   await expect(b1.locator('.bar-row')).toHaveCount(24)
   await litqa.getByRole('button', { name: 'Validation', exact: true }).click()
   await expect(litqa.locator('.bar-row')).toHaveCount(4)
-  await litqa.getByRole('button', { name: 'Public test', exact: true }).click()
+  await litqa.getByRole('button', { name: 'Official test', exact: true }).click()
   await expect(litqa.locator('.bar-row')).toHaveCount(27)
   await expect(litqa.locator('.bar-row.me')).toHaveCount(1)
 })
@@ -89,6 +89,19 @@ test('keeps responsive layouts inside the viewport and the submenu hidden', asyn
     await expect
       .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth))
       .toBe(true)
+    for (const chart of ['#ch-sqa-zoom', '#ch-sqa-prod']) {
+      const ticks = await page.locator(`${chart} .ticks span`).evaluateAll((labels) =>
+        labels
+          .filter((label) => getComputedStyle(label).display !== 'none')
+          .map((label) => {
+            const box = label.getBoundingClientRect()
+            return { left: box.left, right: box.right }
+          })
+      )
+      expect(ticks.length).toBeGreaterThanOrEqual(2)
+      for (let i = 1; i < ticks.length; i++)
+        expect(ticks[i].left).toBeGreaterThanOrEqual(ticks[i - 1].right)
+    }
     const artwork = await page.locator('.hero-backdrop img').boundingBox()
     if (!artwork) throw new Error('Hero artwork must have a rendered box')
     expect(artwork.x).toBeCloseTo(0, 0)
@@ -171,7 +184,7 @@ test('server renders the benchmark content without JavaScript', async ({ browser
   const context = await browser.newContext({ javaScriptEnabled: false })
   const page = await context.newPage()
   await page.goto(`${baseURL}/benchmark/open-science`)
-  await expect(page.getByRole('heading', { name: 'AIPOCH Open-Science Benchmarks' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Open-Science Benchmarks' })).toBeVisible()
   await expect(page.locator('#ch-b1 .bar-row')).toHaveCount(24)
   await expect(page.locator('#ch-pf .bar-row').first()).toContainText('0.4554')
   await expect(page.locator('figure').last()).toHaveCSS('opacity', '1')
@@ -240,6 +253,69 @@ test('reduced motion keeps every section and chart immediately readable', async 
   await expect(page.locator('figure').last()).toHaveCSS('opacity', '1')
   const chart = page.locator('#ch-b4')
   await chart.scrollIntoViewIfNeeded()
+  await expect(chart.locator('.bar-row').first()).toHaveCSS('transition-duration', '0s')
   expect(await chart.evaluate((node) => node.getAnimations({ subtree: true }).length)).toBe(0)
   await expect(chart.locator('.bar-row')).toHaveCount(23)
+})
+
+test('v8 rankings default to All, sort by score, and expose complete source records', async ({
+  page
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  for (const kind of ['litqa', 'pf', 'sqa', 'b1', 'b2', 'b3', 'b4']) {
+    const chart = page.locator(`#ch-${kind}`)
+    const first = chart.locator('.chips button').first()
+    await expect(first).toHaveText(/^All/)
+    await expect(first).toHaveAttribute('aria-pressed', 'true')
+    const scores = await chart.locator('.bar-row .val').allTextContents()
+    expect(scores.map(Number)).toEqual(scores.map(Number).sort((a, b) => b - a))
+  }
+  const scholar = page.locator('#ch-sqa')
+  await expect(scholar.locator('.bar-row')).toHaveCount(42)
+  await scholar.getByRole('button', { name: 'Official test', exact: true }).click()
+  await expect(scholar.locator('.bar-row')).toHaveCount(41)
+  await expect(scholar.locator('.bar-row.me')).toHaveCount(0)
+  await scholar.getByRole('button', { name: 'Validation', exact: true }).click()
+  await expect(scholar.locator('.bar-row')).toHaveCount(1)
+  await expect(scholar.locator('.bar-row')).toContainText('0.9289')
+  await expect(page.locator('#ch-sqa-zoom .bar-row')).toHaveCount(13)
+  await expect(page.locator('#ch-sqa-prod .bar-row')).toHaveCount(10)
+  await page.locator('details').first().locator('summary').click()
+  await expect(page.locator('#tbl-litqa tbody tr')).toHaveCount(27)
+  await expect(page.locator('#tbl-litqa tbody tr').first()).toContainText('T1')
+  await expect(page.locator('#tbl-litqa tbody tr').first()).toContainText('68/75')
+  await expect(page.locator('#tbl-litqa a').first()).toHaveAttribute(
+    'href',
+    /^https:\/\/huggingface.co\/datasets\/allenai\/asta-bench-submissions\//
+  )
+  await page.locator('details').nth(1).locator('summary').click()
+  await expect(page.locator('#tbl-sqa tbody tr')).toHaveCount(42)
+  await expect(page.locator('#tbl-sqa tbody tr').first()).toContainText('Validation, 100 q.')
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+    .toBe(true)
+})
+
+test('eight summary cells retain every internal divider on desktop and mobile', async ({
+  page
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await expect(page.locator('.stat')).toHaveCount(8)
+  for (const [width, columns] of [
+    [1440, 4],
+    [980, 2],
+    [390, 2]
+  ]) {
+    await page.setViewportSize({ width, height: 900 })
+    const styles = await page.locator('.stat').evaluateAll((cells) =>
+      cells.map((cell) => {
+        const css = getComputedStyle(cell)
+        return { right: css.borderRightWidth, bottom: css.borderBottomWidth }
+      })
+    )
+    styles.forEach((style, i) => {
+      expect(style.right).toBe((i + 1) % columns === 0 ? '0px' : '1px')
+      expect(style.bottom).toBe(i < 8 - columns ? '1px' : '0px')
+    })
+  }
 })
