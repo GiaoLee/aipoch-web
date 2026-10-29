@@ -9,6 +9,7 @@ import {
   b4,
   litqa,
   pf,
+  sqa,
   filterRecords,
   matchDistractorRecords,
   type AgentGroup,
@@ -24,6 +25,7 @@ const colors: Record<AgentGroup, string> = {
   smol: 'var(--bench-smol)',
   asta: 'var(--bench-asta)',
   robo: 'var(--bench-robo)',
+  prod: 'var(--bench-robo)',
   other: 'var(--bench-other)'
 }
 const names: Record<AgentGroup, string> = {
@@ -34,6 +36,7 @@ const names: Record<AgentGroup, string> = {
   smol: 'Smolagents Coder',
   asta: 'Asta',
   robo: 'RoboPhD',
+  prod: 'research assistants',
   other: 'other agents'
 }
 const levels = [
@@ -56,6 +59,10 @@ const levels = [
 function sourceLabel(record: BenchmarkRecord) {
   if (record.source === 'local') return 'Local run'
   if (record.source === 'public') return 'Public leaderboard'
+  if (record.id.startsWith('sqa-'))
+    return record.source === 'val' ? 'Local validation, 100 questions' : 'Official test'
+  if (record.source === 'test' && record.group === 'aipoch')
+    return 'Local run on official test split, 75 questions'
   if (record.source === 'test')
     return `Public test, ${record.id.startsWith('pf-') ? 267 : 75} questions`
   return record.group === 'aipoch'
@@ -105,7 +112,12 @@ function Detail({
           Score: <b className="font-mono text-[#afd670]">{record.score}</b>
         </div>
         <div>{sourceLabel(record)}</div>
-        {record.date && <div>Submitted: {record.date}</div>}
+        {record.cost !== undefined && <div>Cost per question: ${record.cost.toFixed(3)}</div>}
+        {record.date && (
+          <div>
+            {record.group === 'aipoch' ? 'Run' : 'Submitted'}: {record.date}
+          </div>
+        )}
         {extra && <div>{extra}</div>}
       </TooltipContent>
     </Tooltip>
@@ -162,35 +174,37 @@ function Ticks({ max = 100, ticks = [0, 25, 50, 75, 100] }: { max?: number; tick
   )
 }
 
-export function BarChart({ kind }: { kind: 'litqa' | 'pf' | 'b1' | 'b2' | 'b3' | 'b4' }) {
+export function BarChart({ kind }: { kind: 'litqa' | 'pf' | 'sqa' | 'b1' | 'b2' | 'b3' | 'b4' }) {
   const [filter, setFilter] = useState<SourceFilter>('all')
   const level = levels.find((level) => level.id.toLowerCase() === kind)
-  const records = kind === 'litqa' ? litqa : kind === 'pf' ? pf : (level?.rows ?? [])
+  const records =
+    kind === 'litqa' ? litqa : kind === 'pf' ? pf : kind === 'sqa' ? sqa : (level?.rows ?? [])
   const title = level
     ? `ASI-Bench ${level.id}`
     : kind === 'litqa'
       ? 'LitQA2-FullText-Search'
-      : 'PaperFinding'
+      : kind === 'sqa'
+        ? 'ScholarQA-CS2'
+        : 'PaperFinding'
   const subtitle = level
     ? `${level.description} · score out of 100`
     : kind === 'litqa'
       ? 'recall@30, % of questions whose target paper is returned in the top 30'
-      : 'combined precision and coverage score, 0 to 1'
-  const filters: [SourceFilter, string][] =
-    kind === 'pf'
-      ? []
-      : kind === 'litqa'
-        ? [
-            ['all', 'All 30'],
-            ['test', 'Public test'],
-            ['val', 'Validation']
-          ]
-        : [
-            ['all', 'All'],
-            ['local', 'Local runs'],
-            ['public', 'Public leaderboard']
-          ]
-  const max = kind === 'pf' ? 0.5 : 100
+      : kind === 'sqa'
+        ? 'cited research answers · composite quality score, 0 to 1'
+        : 'combined precision and coverage score, 0 to 1'
+  const filters: [SourceFilter, string][] = level
+    ? [
+        ['all', 'All'],
+        ['local', 'Local runs'],
+        ['public', 'Public leaderboard']
+      ]
+    : [
+        ['all', `All ${records.length}`],
+        ['test', 'Official test'],
+        ['val', 'Validation']
+      ]
+  const max = kind === 'pf' ? 0.5 : kind === 'sqa' ? 1 : 100
   const groups = [...new Set(records.map((record) => record.group))]
   return (
     <TooltipProvider>
@@ -214,7 +228,16 @@ export function BarChart({ kind }: { kind: 'litqa' | 'pf' | 'b1' | 'b2' | 'b3' |
         </ChartHeading>
         <div className="axis">
           <span />
-          <Ticks max={max} ticks={kind === 'pf' ? [0, 0.1, 0.2, 0.3, 0.4, 0.5] : undefined} />
+          <Ticks
+            max={max}
+            ticks={
+              kind === 'pf'
+                ? [0, 0.1, 0.2, 0.3, 0.4, 0.5]
+                : kind === 'sqa'
+                  ? [0, 0.25, 0.5, 0.75, 1]
+                  : undefined
+            }
+          />
           <span />
         </div>
         <div className="rows">
@@ -233,11 +256,14 @@ export function BarChart({ kind }: { kind: 'litqa' | 'pf' | 'b1' | 'b2' | 'b3' |
                       ? record.model.split(' / ')[0] + (record.model.includes(' / ') ? ' +' : '')
                       : record.model}
                 </em>
-                {(record.source === 'local' || record.source === 'val') && (
-                  <span className="tg">{record.source}</span>
-                )}
+                {(record.source === 'local' ||
+                  record.source === 'val' ||
+                  record.group === 'aipoch') && <span className="tg">{record.source}</span>}
               </span>
-              <span className="track" style={{ backgroundSize: `${kind === 'pf' ? 20 : 25}% 100%` }}>
+              <span
+                className="track"
+                style={{ backgroundSize: `${kind === 'pf' ? 20 : 25}% 100%` }}
+              >
                 <span
                   className="bar"
                   style={{
@@ -246,9 +272,7 @@ export function BarChart({ kind }: { kind: 'litqa' | 'pf' | 'b1' | 'b2' | 'b3' |
                   }}
                 />
               </span>
-              <span className="val">
-                {record.score.toFixed(kind === 'pf' ? 4 : kind === 'litqa' ? 1 : 2)}
-              </span>
+              <span className="val">{record.score.toFixed(max <= 1 ? 4 : 2)}</span>
             </Detail>
           ))}
         </div>
@@ -267,18 +291,8 @@ export function QueryTypes() {
           0.3308,
           'Understands a research topic and finds papers whose content matches it.'
         ],
-        [
-          'Specific paper',
-          10,
-          0.8286,
-          'Pins down one particular paper from the clues given.'
-        ],
-        [
-          'Metadata',
-          8,
-          0.7359,
-          'Finds papers by author, year and other bibliographic fields.'
-        ]
+        ['Specific paper', 10, 0.8286, 'Pins down one particular paper from the clues given.'],
+        ['Metadata', 8, 0.7359, 'Finds papers by author, year and other bibliographic fields.']
       ].map(([name, count, score, description]) => (
         <div className="type" key={name}>
           <div className="benchmark-score-ring">
@@ -483,7 +497,16 @@ function SwarmRow({
         ))}
       </div>
       <div className="val">
-        {ours.score.toFixed(max < 1 ? 4 : label === 'LitQA2' ? 1 : 2)}
+        {records
+          .filter((record) => record.group === 'aipoch')
+          .map((record) => (
+            <span className="swarm-score" key={record.id}>
+              {record.score.toFixed(max <= 1 ? 4 : 2)}
+              {label === 'LitQA2' && (
+                <small>{record.source === 'test' ? 'test' : 'validation'}</small>
+              )}
+            </span>
+          ))}
         <small>{records.length} records</small>
       </div>
       {ticks && (
@@ -516,7 +539,7 @@ export function SwarmChart({ kind }: { kind: 'asta' | 'asi' }) {
             round
             groups={
               kind === 'asta'
-                ? ['aipoch', 'asta', 'react', 'smol', 'robo', 'other']
+                ? ['aipoch', 'asta', 'react', 'smol', 'robo', 'prod', 'other']
                 : ['aipoch', 'codex', 'claude', 'other']
             }
           >
@@ -541,6 +564,13 @@ export function SwarmChart({ kind }: { kind: 'asta' | 'asi' }) {
               subtitle="score, 0–1"
               max={0.5}
               ticks={[0, 0.1, 0.2, 0.3, 0.4, 0.5]}
+            />
+            <SwarmRow
+              records={sqa}
+              label="ScholarQA-CS2"
+              subtitle="score, 0–1"
+              max={1}
+              ticks={[0, 0.25, 0.5, 0.75, 1]}
             />
           </>
         ) : (
@@ -618,6 +648,92 @@ export function DistractorChart() {
               {record.delta > 0 ? '+' : ''}
               {record.delta.toFixed(2)}
             </span>
+          </Detail>
+        ))}
+      </section>
+    </TooltipProvider>
+  )
+}
+
+/** Zoomed dots preserve the truncated axis; assistant lollipops use the full score scale. */
+export function ScholarComparison({ zoom = false }: { zoom?: boolean }) {
+  const records = filterRecords(
+    sqa.filter((r) => (zoom ? r.score >= 0.866 : r.group === 'aipoch' || r.group === 'prod')),
+    'all'
+  )
+  const min = zoom ? 0.84 : 0
+  const max = zoom ? 0.94 : 1
+  const ticks = zoom ? [0.84, 0.86, 0.88, 0.9, 0.92, 0.94] : [0, 0.25, 0.5, 0.75, 1]
+  const position = (value: number) => `${((value - min) / (max - min)) * 100}%`
+  return (
+    <TooltipProvider>
+      <section
+        id={zoom ? 'ch-sqa-zoom' : 'ch-sqa-prod'}
+        className="chart scholar-comparison"
+        aria-label={zoom ? 'ScholarQA-CS2: top of the field' : 'ScholarQA-CS2: research assistants'}
+      >
+        <ChartHeading
+          title={zoom ? 'ScholarQA-CS2: top of the field' : 'ScholarQA-CS2: research assistants'}
+          subtitle={
+            zoom
+              ? 'Zoomed axis · 0.84–0.94 · validation vs official test'
+              : 'Full scale · 0–1 · validation vs official test'
+          }
+        >
+          <Legend round groups={[...new Set(records.map((r) => r.group))]} />
+        </ChartHeading>
+        <div className="axis">
+          <span />
+          <div className="ticks" aria-hidden="true">
+            {ticks.map((t) => (
+              <span key={t} style={{ left: position(t) }}>
+                {t}
+              </span>
+            ))}
+          </div>
+          <span />
+        </div>
+        {records.map((record) => (
+          <Detail
+            key={record.id}
+            record={record}
+            className={`bar-row ${record.group === 'aipoch' ? 'me' : ''}`}
+            extra={
+              zoom && record.group === 'aipoch'
+                ? '+0.0097 vs best official test; different question splits'
+                : undefined
+            }
+          >
+            <span className="lab">
+              <span className="agent-name">{record.system}</span>
+              <em>{record.model}</em>
+              {record.source === 'val' && <span className="tg">val</span>}
+            </span>
+            <span className="track" style={{ backgroundSize: `${100 / (ticks.length - 1)}% 100%` }}>
+              {!zoom && (
+                <span
+                  className="scholar-stem"
+                  style={{ width: position(record.score), background: colors[record.group] }}
+                />
+              )}
+              {zoom && record.group === 'aipoch' && (
+                <span
+                  className="scholar-gap"
+                  style={{ left: position(0.9192), width: `${(0.0097 / (max - min)) * 100}%` }}
+                />
+              )}
+              <span
+                className="scholar-dot"
+                style={{
+                  left: position(record.score),
+                  background:
+                    record.source === 'val' ? 'var(--bench-validation)' : colors[record.group],
+                  borderColor:
+                    record.source === 'val' ? 'var(--bench-green-ink)' : colors[record.group]
+                }}
+              />
+            </span>
+            <span className="val">{record.score.toFixed(4)}</span>
           </Detail>
         ))}
       </section>

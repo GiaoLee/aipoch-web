@@ -10,6 +10,9 @@ const revealTargets = [
   '.hero-cta',
   '.stat',
   '.col > h2',
+  '.col > h3',
+  '.callout-block',
+  '.records',
   '.col > p',
   '.cell-text > h3',
   '.cell-text > p',
@@ -76,7 +79,9 @@ export function BenchmarkMotion({ children }: { children: ReactNode }) {
         })
       }
       target
-        .querySelectorAll('.level-row .segment, .point, .point-label')
+        .querySelectorAll(
+          '.level-row .segment, .point, .point-label, .scholar-dot, .scholar-stem, .scholar-gap'
+        )
         .forEach((mark, index) => {
           play(mark, [{ opacity: 0 }, { opacity: 1 }], {
             duration: 600,

@@ -1,4 +1,4 @@
-// Evaluation snapshot supplied with the benchmark article, compiled 19 October 2026.
+// Evaluation snapshots supplied with the article, compiled 19 and 26 October 2026.
 export type AgentGroup =
   | 'aipoch'
   | 'codex'
@@ -8,6 +8,7 @@ export type AgentGroup =
   | 'asta'
   | 'robo'
   | 'other'
+  | 'prod'
 export type RecordSource = 'val' | 'test' | 'local' | 'public'
 export type BenchmarkRecord = {
   id: string
@@ -16,6 +17,8 @@ export type BenchmarkRecord = {
   score: number
   source: RecordSource
   group: AgentGroup
+  cost?: number
+  log?: string
   date?: string
 }
 
@@ -23,77 +26,106 @@ export const litqa: BenchmarkRecord[] = [
   {
     id: 'litqa-1',
     system: 'AIPOCH Open-Science',
+    model: 'gpt-6-astra · literature-retrieval agent',
+    score: 90.6667,
+    source: 'test',
+    group: 'aipoch',
+    date: '2026-10-23'
+  },
+  {
+    id: 'litqa-2',
+    system: 'AIPOCH Open-Science',
     model: 'deepseek-v4-flash',
     score: 100,
     source: 'val',
     group: 'aipoch'
   },
   {
-    id: 'litqa-2',
-    system: 'Asta Paper Finder',
-    model: 'openai/gpt-4o-mini',
-    score: 90.6667,
-    source: 'test',
-    group: 'asta'
-  },
-  {
     id: 'litqa-3',
-    system: 'Asta v0',
-    model: 'mockllm/model',
+    system: 'Asta Paper Finder',
+    model: 'Gemini 2.0 Flash (unpinned) / gpt-4o-2024-08-06',
     score: 90.6667,
     source: 'test',
-    group: 'asta'
+    group: 'asta',
+    cost: 0.112,
+    date: '2025-08-07',
+    log: 'aryeh_tiktinsky_ai2_Asta_Paper_Finder_2025-08-07T19-03-14'
   },
   {
     id: 'litqa-4',
-    system: 'ReAct',
-    model: 'anthropic/claude-sonnet-4-6',
-    score: 86.6667,
+    system: 'Asta v0',
+    model:
+      'Claude Sonnet 4 (2025-05) / Gemini 2.0 Flash (unpinned) / o3 (2025-04) / o3 / GPT-4.1 (2025-04) / gpt-4o-2024-08-06 / GPT-4o (unpinned)',
+    score: 90.6667,
     source: 'test',
-    group: 'react'
+    group: 'asta',
+    cost: 0.112,
+    date: '2025-08-13',
+    log: 'miked-ai_Asta-v0_2025-08-14T02-11-03'
   },
   {
     id: 'litqa-5',
     system: 'ReAct',
-    model: 'anthropic/claude-opus-4-6',
+    model: 'claude-opus-4-6',
     score: 86.6667,
     source: 'test',
-    group: 'react'
+    group: 'react',
+    cost: 1.493,
+    date: '2026-04-21'
   },
   {
     id: 'litqa-6',
     system: 'ReAct',
-    model: 'anthropic/claude-opus-4-7',
-    score: 85.3333,
+    model: 'claude-sonnet-4-6',
+    score: 86.6667,
     source: 'test',
-    group: 'react'
+    group: 'react',
+    cost: 1.872,
+    date: '2026-04-21'
   },
   {
     id: 'litqa-7',
     system: 'ReAct',
-    model: 'openai/gpt-5.5-2026-04-23',
+    model: 'claude-opus-4-7',
     score: 85.3333,
     source: 'test',
-    group: 'react'
+    group: 'react',
+    cost: 1.99,
+    date: '2026-04-21'
   },
   {
     id: 'litqa-8',
     system: 'ReAct',
-    model: 'openai/gpt-5-2025-08-07',
-    score: 82.6667,
+    model: 'gpt-5.5-2026-04-23',
+    score: 85.3333,
     source: 'test',
-    group: 'react'
+    group: 'react',
+    cost: 7.324,
+    date: '2026-04-27'
   },
   {
     id: 'litqa-9',
     system: 'ReAct',
-    model: 'openai/gpt-5.4-2026-03-05',
-    score: 80,
+    model: 'GPT-5 (2025-08)',
+    score: 82.6667,
     source: 'test',
-    group: 'react'
+    group: 'react',
+    cost: 0.389,
+    date: '2025-08-11',
+    log: 'miked-ai_ReAct-GPT-5_2025-08-11T16-34-47'
   },
   {
     id: 'litqa-10',
+    system: 'ReAct',
+    model: 'gpt-5.4-2026-03-05',
+    score: 80,
+    source: 'test',
+    group: 'react',
+    cost: 3.167,
+    date: '2026-04-21'
+  },
+  {
+    id: 'litqa-11',
     system: 'Asta Paper Finder',
     model: 'openai/gpt-4o-mini',
     score: 80,
@@ -101,87 +133,116 @@ export const litqa: BenchmarkRecord[] = [
     group: 'asta'
   },
   {
-    id: 'litqa-11',
-    system: 'ReAct',
-    model: 'google/gemini-3.1-pro-preview',
-    score: 77.3333,
-    source: 'test',
-    group: 'react'
-  },
-  {
     id: 'litqa-12',
     system: 'ReAct',
-    model: 'openai/gpt-4o-2024-08-06',
-    score: 66.6667,
+    model: 'gemini-3.1-pro-preview',
+    score: 77.3333,
     source: 'test',
-    group: 'react'
+    group: 'react',
+    cost: 4.261,
+    date: '2026-04-21'
   },
   {
     id: 'litqa-13',
     system: 'ReAct',
-    model: 'openai/gpt-4.1-2025-04-14',
-    score: 65.3333,
+    model: 'GPT-4o (2024-08)',
+    score: 66.6667,
     source: 'test',
-    group: 'react'
+    group: 'react',
+    cost: 0.328,
+    date: '2025-08-08',
+    log: 'miked-ai_ReAct-GPT-4o_2025-08-08T16-01-09'
   },
   {
     id: 'litqa-14',
     system: 'ReAct',
-    model: 'anthropic/claude-3-5-haiku-20241022',
-    score: 60,
+    model: 'GPT-4.1 (2025-04)',
+    score: 65.3333,
     source: 'test',
-    group: 'react'
+    group: 'react',
+    cost: 0.819,
+    date: '2025-08-08',
+    log: 'miked-ai_ReAct-GPT-4.1_2025-08-08T16-00-51'
   },
   {
     id: 'litqa-15',
     system: 'ReAct',
-    model: 'google/gemini-2.5-flash-preview-05-20',
-    score: 57.3333,
+    model: 'Claude 3.5 Haiku (2024-10)',
+    score: 60,
     source: 'test',
-    group: 'react'
+    group: 'react',
+    cost: 0.069,
+    date: '2025-08-08',
+    log: 'miked-ai_ReAct-Claude-3.5-Haiku_2025-08-08T15-59-56'
   },
   {
     id: 'litqa-16',
     system: 'ReAct',
-    model: 'openai/o3-2025-04-16',
+    model: 'o3 (2025-04)',
     score: 57.3333,
     source: 'test',
-    group: 'react'
+    group: 'react',
+    cost: 0.79,
+    date: '2025-08-08',
+    log: 'miked-ai_ReAct-o3_2025-08-08T16-01-22'
   },
   {
     id: 'litqa-17',
     system: 'ReAct',
-    model: 'openai/gpt-5-mini-2025-08-07',
-    score: 56,
+    model: 'Gemini 2.5 Flash (2024-05)',
+    score: 57.3333,
     source: 'test',
-    group: 'react'
+    group: 'react',
+    cost: 0.65,
+    date: '2025-08-08',
+    log: 'miked-ai_ReAct-Gemini-2.5-Flash_2025-08-08T16-00-31'
   },
   {
     id: 'litqa-18',
-    system: 'Smolagents Coder',
-    model: 'openai/gpt-5-2025-08-07',
-    score: 54.6667,
+    system: 'ReAct',
+    model: 'GPT-5 Mini (2025-08)',
+    score: 56,
     source: 'test',
-    group: 'smol'
+    group: 'react',
+    cost: 0.118,
+    date: '2025-08-11',
+    log: 'miked-ai_ReAct-GPT-5-mini_2025-08-11T16-35-18'
   },
   {
     id: 'litqa-19',
     system: 'Smolagents Coder',
-    model: 'anthropic/claude-sonnet-4-20250514',
-    score: 52,
+    model: 'GPT-5 (2025-08)',
+    score: 54.6667,
     source: 'test',
-    group: 'smol'
+    group: 'smol',
+    cost: 0.152,
+    date: '2025-08-14',
+    log: 'miked-ai_Smolagents-GPT-5_2025-08-14T18-53-46'
   },
   {
     id: 'litqa-20',
     system: 'Smolagents Coder',
-    model: 'openai/gpt-4.1-2025-04-14',
-    score: 50.6667,
+    model: 'Claude Sonnet 4 (2025-05)',
+    score: 52,
     source: 'test',
-    group: 'smol'
+    group: 'smol',
+    cost: 1.099,
+    date: '2025-08-08',
+    log: 'miked-ai_Smolagents-Claude-Sonnet-4_2025-08-08T15-58-04'
   },
   {
     id: 'litqa-21',
+    system: 'Smolagents Coder',
+    model: 'GPT-4.1 (2025-04)',
+    score: 50.6667,
+    source: 'test',
+    group: 'smol',
+    cost: 0.095,
+    date: '2025-08-08',
+    log: 'miked-ai_Smolagents-GPT-4.1_2025-08-08T15-59-03'
+  },
+  {
+    id: 'litqa-22',
     system: 'You.com Search API',
     model: 'openai/gpt-4o-mini',
     score: 50,
@@ -189,55 +250,72 @@ export const litqa: BenchmarkRecord[] = [
     group: 'other'
   },
   {
-    id: 'litqa-22',
+    id: 'litqa-23',
     system: 'Smolagents Coder',
-    model: 'openai/gpt-5-mini-2025-08-07',
+    model: 'GPT-5 Mini (2025-08)',
     score: 48,
     source: 'test',
-    group: 'smol'
-  },
-  {
-    id: 'litqa-23',
-    system: 'ReAct',
-    model: 'anthropic/claude-sonnet-4-20250514',
-    score: 46.6667,
-    source: 'test',
-    group: 'react'
+    group: 'smol',
+    cost: 0.036,
+    date: '2025-08-14',
+    log: 'miked-ai_Smolagents-GPT-5-mini_2025-08-14T18-53-01'
   },
   {
     id: 'litqa-24',
     system: 'ReAct',
-    model: 'together/meta-llama/Llama-4-Scout-17B-16E-Instruct',
-    score: 37.3333,
+    model: 'Claude Sonnet 4 (2025-05)',
+    score: 46.6667,
     source: 'test',
-    group: 'react'
+    group: 'react',
+    cost: 0.553,
+    date: '2025-08-08',
+    log: 'miked-ai_ReAct-Claude-Sonnet-4_2025-08-08T16-00-10'
   },
   {
     id: 'litqa-25',
-    system: 'You.com Search API',
-    model: 'openai/gpt-4o-mini',
-    score: 36,
+    system: 'ReAct',
+    model: 'Llama 4 Scout 17B (unpinned)',
+    score: 37.3333,
     source: 'test',
-    group: 'other'
+    group: 'react',
+    cost: 4.326,
+    date: '2025-08-08',
+    log: 'miked-ai_ReAct-Llama-4-Scout_2025-08-08T15-59-30'
   },
   {
     id: 'litqa-26',
-    system: 'Smolagents Coder',
-    model: 'google/gemini-2.5-flash-preview-05-20',
+    system: 'You.com Search API',
+    model: 'not disclosed',
     score: 36,
     source: 'test',
-    group: 'smol'
+    group: 'other',
+    date: '2025-08-07',
+    log: 'aryeh_tiktinsky_ai2_You.com_Search_API_2025-08-07T18-53-46'
   },
   {
     id: 'litqa-27',
     system: 'Smolagents Coder',
-    model: 'openai/gpt-4o-2024-08-06',
-    score: 20,
+    model: 'Gemini 2.5 Flash (2024-05)',
+    score: 36,
     source: 'test',
-    group: 'smol'
+    group: 'smol',
+    cost: 0.089,
+    date: '2025-08-08',
+    log: 'miked-ai_Smolagents-Gemini-2.5-Flash_2025-08-08T15-58-36'
   },
   {
     id: 'litqa-28',
+    system: 'Smolagents Coder',
+    model: 'GPT-4o (2024-08)',
+    score: 20,
+    source: 'test',
+    group: 'smol',
+    cost: 0.105,
+    date: '2025-08-08',
+    log: 'miked-ai_Smolagents-GPT-4o_2025-08-08T16-08-41'
+  },
+  {
+    id: 'litqa-29',
     system: 'ReAct',
     model: 'anthropic/claude-3-5-haiku-20241022',
     score: 10,
@@ -245,20 +323,365 @@ export const litqa: BenchmarkRecord[] = [
     group: 'react'
   },
   {
-    id: 'litqa-29',
+    id: 'litqa-30',
     system: 'Smolagents Coder',
-    model: 'together/meta-llama/Llama-4-Scout-17B-16E-Instruct',
+    model: 'Llama 4 Scout 17B (unpinned)',
     score: 6.6667,
+    source: 'test',
+    group: 'smol',
+    cost: 0.01,
+    date: '2025-08-08',
+    log: 'miked-ai_Smolagents-Llama-4-Scout_2025-08-08T15-57-17'
+  },
+  {
+    id: 'litqa-31',
+    system: 'Smolagents Coder',
+    model: 'Claude 3.5 Haiku (2024-10)',
+    score: 2.6667,
+    source: 'test',
+    group: 'smol',
+    cost: 0.096,
+    date: '2025-08-08',
+    log: 'miked-ai_Smolagents-Claude-3.5-Haiku_2025-08-08T15-57-42'
+  }
+]
+
+export const sqa: BenchmarkRecord[] = [
+  {
+    id: 'sqa-1',
+    system: 'AIPOCH Open-Science',
+    model: 'deepseek-v4-flash',
+    score: 0.9289,
+    source: 'val',
+    group: 'aipoch'
+  },
+  {
+    id: 'sqa-2',
+    system: 'Asta Scholar QA (w/ tables)',
+    model: 'not disclosed',
+    score: 0.9192,
+    source: 'test',
+    group: 'asta'
+  },
+  {
+    id: 'sqa-3',
+    system: 'Asta Scholar QA (w/ tables)',
+    model: 'not disclosed',
+    score: 0.9131,
+    source: 'test',
+    group: 'asta'
+  },
+  {
+    id: 'sqa-4',
+    system: 'ReAct',
+    model: 'openai/gpt-5.4-2026-03-05',
+    score: 0.9038,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'sqa-5',
+    system: 'Asta v0',
+    model: 'multiple models',
+    score: 0.9014,
+    source: 'test',
+    group: 'asta'
+  },
+  {
+    id: 'sqa-6',
+    system: 'Asta Scholar QA (w/ tables)',
+    model: 'not disclosed',
+    score: 0.9,
+    source: 'test',
+    group: 'asta'
+  },
+  {
+    id: 'sqa-7',
+    system: 'Asta Scholar QA',
+    model: 'not disclosed',
+    score: 0.899,
+    source: 'test',
+    group: 'asta'
+  },
+  {
+    id: 'sqa-8',
+    system: 'Asta Scholar QA',
+    model: 'not disclosed',
+    score: 0.8943,
+    source: 'test',
+    group: 'asta'
+  },
+  {
+    id: 'sqa-9',
+    system: 'Asta Scholar QA',
+    model: 'not disclosed',
+    score: 0.8861,
+    source: 'test',
+    group: 'asta'
+  },
+  {
+    id: 'sqa-10',
+    system: 'Asta Scholar QA',
+    model: 'not disclosed',
+    score: 0.8824,
+    source: 'test',
+    group: 'asta'
+  },
+  {
+    id: 'sqa-11',
+    system: 'SciSpace Deep Review',
+    model: 'not disclosed',
+    score: 0.8741,
+    source: 'test',
+    group: 'prod'
+  },
+  {
+    id: 'sqa-12',
+    system: 'ReAct',
+    model: 'openai/gpt-5.5-2026-04-23',
+    score: 0.8663,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'sqa-13',
+    system: 'Elicit',
+    model: 'not disclosed',
+    score: 0.8663,
+    source: 'test',
+    group: 'prod'
+  },
+  {
+    id: 'sqa-14',
+    system: 'ReAct',
+    model: 'anthropic/claude-opus-4-7',
+    score: 0.8582,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'sqa-15',
+    system: 'FutureHouse Crow',
+    model: 'not disclosed',
+    score: 0.8536,
+    source: 'test',
+    group: 'prod'
+  },
+  {
+    id: 'sqa-16',
+    system: 'ReAct',
+    model: 'anthropic/claude-opus-4-6',
+    score: 0.8494,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'sqa-17',
+    system: 'FutureHouse Falcon',
+    model: 'not disclosed',
+    score: 0.8238,
+    source: 'test',
+    group: 'prod'
+  },
+  {
+    id: 'sqa-18',
+    system: 'STORM',
+    model: 'not disclosed',
+    score: 0.8167,
+    source: 'test',
+    group: 'prod'
+  },
+  {
+    id: 'sqa-19',
+    system: 'ReAct',
+    model: 'openai/gpt-5-2025-08-07',
+    score: 0.8145,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'sqa-20',
+    system: 'ReAct',
+    model: 'anthropic/claude-sonnet-4-20250514',
+    score: 0.802,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'sqa-21',
+    system: 'OpenAI Deep Research',
+    model: 'openai/o3-deep-research-2025-06-26',
+    score: 0.794,
+    source: 'test',
+    group: 'prod'
+  },
+  {
+    id: 'sqa-22',
+    system: 'Asta Scholar QA',
+    model: 'not disclosed',
+    score: 0.7904,
+    source: 'test',
+    group: 'asta'
+  },
+  {
+    id: 'sqa-23',
+    system: 'ReAct',
+    model: 'anthropic/claude-sonnet-4-6',
+    score: 0.7817,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'sqa-24',
+    system: 'Smolagents Coder',
+    model: 'anthropic/claude-sonnet-4-20250514',
+    score: 0.7475,
     source: 'test',
     group: 'smol'
   },
   {
-    id: 'litqa-30',
+    id: 'sqa-25',
     system: 'Smolagents Coder',
-    model: 'anthropic/claude-3-5-haiku-20241022',
-    score: 2.6667,
+    model: 'openai/gpt-4.1-2025-04-14',
+    score: 0.7454,
     source: 'test',
     group: 'smol'
+  },
+  {
+    id: 'sqa-26',
+    system: 'ReAct',
+    model: 'google/gemini-3.1-pro-preview',
+    score: 0.7403,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'sqa-27',
+    system: 'Perplexity Sonar Deep Research',
+    model: 'perplexity/sonar-deep-research',
+    score: 0.7038,
+    source: 'test',
+    group: 'prod'
+  },
+  {
+    id: 'sqa-28',
+    system: 'ReAct',
+    model: 'openai/gpt-4.1-2025-04-14',
+    score: 0.7024,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'sqa-29',
+    system: 'ReAct',
+    model: 'openai/o3-2025-04-16',
+    score: 0.6949,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'sqa-30',
+    system: 'Smolagents Coder',
+    model: 'openai/gpt-5-2025-08-07',
+    score: 0.6934,
+    source: 'test',
+    group: 'smol'
+  },
+  {
+    id: 'sqa-31',
+    system: 'ReAct',
+    model: 'anthropic/claude-3-5-haiku-20241022',
+    score: 0.6555,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'sqa-32',
+    system: 'Smolagents Coder',
+    model: 'google/gemini-2.5-flash-preview-05-20',
+    score: 0.6441,
+    source: 'test',
+    group: 'smol'
+  },
+  {
+    id: 'sqa-33',
+    system: 'You.com Research API',
+    model: 'not disclosed',
+    score: 0.608,
+    source: 'test',
+    group: 'prod'
+  },
+  {
+    id: 'sqa-34',
+    system: 'OpenSciLM',
+    model: 'not disclosed',
+    score: 0.5946,
+    source: 'test',
+    group: 'prod'
+  },
+  {
+    id: 'sqa-35',
+    system: 'Smolagents Coder',
+    model: 'openai/gpt-5-mini-2025-08-07',
+    score: 0.5808,
+    source: 'test',
+    group: 'smol'
+  },
+  {
+    id: 'sqa-36',
+    system: 'ReAct',
+    model: 'openai/gpt-4o-2024-08-06',
+    score: 0.5448,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'sqa-37',
+    system: 'ReAct',
+    model: 'google/gemini-2.5-flash-preview-05-20',
+    score: 0.5212,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'sqa-38',
+    system: 'Smolagents Coder',
+    model: 'anthropic/claude-3-5-haiku-20241022',
+    score: 0.5164,
+    source: 'test',
+    group: 'smol'
+  },
+  {
+    id: 'sqa-39',
+    system: 'Smolagents Coder',
+    model: 'openai/gpt-4o-2024-08-06',
+    score: 0.4858,
+    source: 'test',
+    group: 'smol'
+  },
+  {
+    id: 'sqa-40',
+    system: 'Smolagents Coder',
+    model: 'together/meta-llama/Llama-4-Scout-17B-16E-Instruct',
+    score: 0.389,
+    source: 'test',
+    group: 'smol'
+  },
+  {
+    id: 'sqa-41',
+    system: 'ReAct',
+    model: 'openai/gpt-5-mini-2025-08-07',
+    score: 0.2729,
+    source: 'test',
+    group: 'react'
+  },
+  {
+    id: 'sqa-42',
+    system: 'ReAct',
+    model: 'together/meta-llama/Llama-4-Scout-17B-16E-Instruct',
+    score: 0.2568,
+    source: 'test',
+    group: 'react'
   }
 ]
 
@@ -1330,11 +1753,16 @@ export const b4: BenchmarkRecord[] = [
 ]
 
 export type SourceFilter = 'all' | RecordSource
-/** Reference records remain visible so changing sources keeps the comparison meaningful. */
+/** ASI comparisons retain local references; AstaBench filters keep question splits separate. */
 export function filterRecords(records: BenchmarkRecord[], source: SourceFilter) {
-  return records.filter(
-    (record) => source === 'all' || record.source === source || record.group === 'aipoch'
-  )
+  return records
+    .filter(
+      (record) =>
+        source === 'all' ||
+        record.source === source ||
+        ((source === 'public' || source === 'local') && record.group === 'aipoch')
+    )
+    .sort((a, b) => b.score - a.score)
 }
 export function matchDistractorRecords() {
   return b4.flatMap((record) => {

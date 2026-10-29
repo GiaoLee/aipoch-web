@@ -3,11 +3,11 @@ import { commonLayoutLastModified } from '@/lib/common-layout-metadata'
 import { SITE_DOMAIN } from '@/lib/config'
 import { createPageMetadata } from '@/lib/page-metadata'
 
-export const OPEN_SCIENCE_BENCHMARK_LAST_MODIFIED = '2026-10-28'
+export const OPEN_SCIENCE_BENCHMARK_LAST_MODIFIED = '2026-10-29'
 const pageUrl = `${SITE_DOMAIN}/benchmark/open-science`
 const title = 'Open-Science Benchmarks: AstaBench and ASI-Bench · AIPOCH'
 const description =
-  'Explore AIPOCH Open-Science’s results across six scientific-agent tests, with evaluation methods, configurations, complete comparison records, and supporting evidence.'
+  'Explore AIPOCH Open-Science’s results across seven scientific-agent tests, with evaluation methods, configurations, complete comparison records, and supporting evidence.'
 export const benchmarkMetadata = createPageMetadata({
   title,
   description,
